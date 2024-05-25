@@ -35,12 +35,15 @@ sequelize.authenticate()
     console.log('Connection has been established successfully.');
     // define a new table 'users'
     User = sequelize.define('users', {
-      firstName: {
-        type: Sequelize.STRING
-      },
-      lastName: {
-        type: Sequelize.STRING
-      }
+      firstName: { type: Sequelize.STRING },
+      lastName: { type: Sequelize.STRING }
+    });
+    
+    Admins = sequelize.define('admins', {
+      id: { type: Sequelize.STRING },
+      username: { type: Sequelize.STRING },
+      password: { type: Sequelize.STRING },
+      active: { type: Sequelize.BOOLEAN }
     });
     
     setup();
