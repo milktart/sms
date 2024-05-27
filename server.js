@@ -2,9 +2,14 @@
 // where your node app starts
 
 // init project
-var express = require('express');
-var Sequelize = require('sequelize');
-var app = express();
+const express = require('express');
+const Sequelize = require('sequelize');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const app = express();
 
 // default user list
 var users = [
