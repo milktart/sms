@@ -4,7 +4,7 @@
   "description": "Example app showing use of SQLite3 using the Sequelize ORM",
   "main": "server.js",
   "scripts": {
-    "build:digitalocean": "npm install && npm run build && npm ci",
+    "build:digitalocean": "npm install && npm install --package-lock-only && npm run build && npm ci",
     "start": "node server.js"
   },
   "dependencies": {
