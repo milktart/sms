@@ -15,7 +15,6 @@ $(function() {
     var username = $('input#username').val();
     var password = $('input#password').val();
     $.post('/login?' + $.param({username:username, password:password}), function() {
-    //$.post('/login', {username:username, password:password}, function() {
       //$('<li></li>').text(fName + " " + lName).appendTo('ul#users');
       $('input#username').val('');
       $('input#password').val('');
