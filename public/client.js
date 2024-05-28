@@ -14,13 +14,13 @@ $(function() {
     event.preventDefault();
     var username = $('input#username').val();
     var password = $('input#password').val();
-    console.log(username)
-	console.log(password)
+    alert(username);
+    alert(password);
     $.post('/login?' + $.param({username:username, password:password}), function() {
       //$('<li></li>').text(fName + " " + lName).appendTo('ul#users');
       $('input#username').val('');
       $('input#password').val('');
-      $('input').focus();
+      //$('input').focus();
     });
   });
 });
