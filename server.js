@@ -62,8 +62,8 @@ sequelize.authenticate()
     
     Admins = sequelize.define('admins', {
         id: { 
-          type: DataTypes.UUID,
-          defaultValue: DataTypes.UUIDV4,
+          type: Sequelize.UUID,
+          defaultValue: Sequelize.UUIDV4,
           primaryKey: true, 
           allowNull: false
         },
@@ -133,6 +133,13 @@ app.post('/register', async (request, response) => {
     //const admin = new Admin({ username, password: hashedPassword });
     //await admin.save();
     response.status(201).send('Admin registered');
+    var adminUsers=[];
+    Admins.findAll().then(function(admins) { // find all entries in the users tables
+			admins.forEach(function(admin) {
+      	adminUsers.push([admin.name,admin.username]); // adds their info to the dbUsers value
+    	});
+    response.send(adminUsers); // sends dbUsers back to the page
+  });
   } catch (error) {
     response.status(400).send('Username already exists');
   }
