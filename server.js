@@ -92,7 +92,16 @@ sequelize.authenticate()
 
 // populate table with default users
 function setup(){
-  Admins.sync({force: true});
+	const hashedPassword = await bcrypt.hash(process.env.def_admin, 10);
+  Admins.sync({force: true})
+	  .then(function(){
+		  Admins.create({ 
+			  name: "Julian", 
+			  username: "julian", 
+			  password: hashedPW,
+			  active: 1
+		  });
+	  });
   User.sync({force: true}) // We use 'force: true' in this example to drop the table users if it already exists, and create a new one. You'll most likely want to remove this setting in your own apps
     .then(function(){
       // Add the default users to the database
@@ -127,7 +136,7 @@ app.post('/register', async (request, response) => {
     Admins.create({ 
       name: request.query.name, 
       username: request.query.username, 
-      password: request.query.hashedPassword,
+      password: hashedPassword,
       active: 1
     });
     //const admin = new Admin({ username, password: hashedPassword });
@@ -148,10 +157,7 @@ app.post('/register', async (request, response) => {
 });
 
 app.post('/login', async (request, response) => {
-  const { username, password } = request.body;
-	console.log(request);
-	console.log(request.body);
-	console.log(request.query);
+  const { username, password } = request.query;
 
   if (!username || !password) {
     return response.status(400).send('Username and password are required');
