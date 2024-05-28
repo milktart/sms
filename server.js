@@ -148,24 +148,37 @@ app.post('/register', async (request, response) => {
 });
 
 app.post('/login', async (request, response) => {
-  const { username, password } = request.body;
+  const { username, password } = request.query;
 
   if (!username || !password) {
-    return res.status(400).send('Username and password are required');
+    return response.status(400).send('Username and password are required');
   }
 
-  const user = await User.findOne({ username });
-  if (!user) {
+  const admin = await Admins.findOne({ username });
+  if (!admin) {
     return response.status(400).send('Invalid username or password');
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isPasswordValid = await bcrypt.compare(password, admin.password);
   if (!isPasswordValid) {
     return response.status(400).send('Invalid username or password');
   }
 
   const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
   response.json({ token });
+  response.redirect("/loggedin");
+});
+
+app.get("/loggedin", function (request, response) {
+  var dbUsers=[];
+  Admins.findAll().then(function(users) { // find all entries in the users tables
+    users.forEach(function(user) {
+      console.log(user.name);
+      alert(user.name);
+      dbUsers.push([user.name,user.username]); // adds their info to the dbUsers value
+    });
+    response.send(dbUsers); // sends dbUsers back to the page
+  });
 });
 
 app.get("/users", function (request, response) {
