@@ -148,7 +148,9 @@ app.post('/register', async (request, response) => {
 });
 
 app.post('/login', async (request, response) => {
-  const { username, password } = request.query;
+  const { username, password } = request.body;
+  console.log(request.body);
+  console.log(request.query);
 
   if (!username || !password) {
     return response.status(400).send('Username and password are required');
