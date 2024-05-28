@@ -147,7 +147,7 @@ app.post('/register', async (request, response) => {
   }
 });
 
-app.post('/login', function (request, response) => {
+app.post('/login', function (request, response) {
   const { username, password } = request.body;
   console.log(request);
   console.log(request.query);
