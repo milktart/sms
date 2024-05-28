@@ -19,6 +19,21 @@ var users = [
     ];
 var User;
 
+const JWT_SECRET = 'your_secret_key';  // Replace with your own secret key
+
+// Middleware
+app.use(bodyParser.json());
+
+// Mongoose User schema
+mongoose.connect('mongodb://localhost:27017/userlogin', { useNewUrlParser: true, useUnifiedTopology: true });
+
+const adminSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+});
+
+const Admin = mongoose.model('Admin', adminSchema);
+
 // setup a new database
 // using database credentials set in .env
 var sequelize = new Sequelize('database', process.env.DB_USER, process.env.DB_PASS, {
@@ -90,12 +105,47 @@ app.get("/", function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
 
-app.get("/login", function (request, response) {
-  return;
+app.post('/register', async (request, response) => {
+  const { username, password } = request.body;
+
+  if (!username || !password) {
+    return response.status(400).send('Username and password are required');
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    const admin = new Admin({ username, password: hashedPassword });
+    await admin.save();
+    response.status(201).send('Admin registered');
+  } catch (error) {
+    response.status(400).send('Username already exists');
+  }
+});
+
+app.post('/login', async (request, response) => {
+  const { username, password } = request.body;
+
+  if (!username || !password) {
+    return res.status(400).send('Username and password are required');
+  }
+
+  const user = await User.findOne({ username });
+  if (!user) {
+    return response.status(400).send('Invalid username or password');
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return response.status(400).send('Invalid username or password');
+  }
+
+  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+  response.json({ token });
 });
 
 app.get("/users", function (request, response) {
-  response.sendFile(__dirname + '/views/users.html');
+  response.sendFile(__dirname + '/views/user.html');
   var dbUsers=[];
   User.findAll().then(function(users) { // find all entries in the users tables
     users.forEach(function(user) {
@@ -127,3 +177,5 @@ app.get("/clear", function (request, response) {
 var listener = app.listen(process.env.PORT, function () {
   console.log('Your app is listening on port ' + listener.address().port);
 });
+
+
