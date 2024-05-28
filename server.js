@@ -134,12 +134,13 @@ app.post('/register', async (request, response) => {
     //await admin.save();
     response.status(201).send('Admin registered');
     var adminUsers=[];
-    Admins.findAll().then(function(admins) { // find all entries in the users tables
+    Admins.findAll().then(function(admins) {
 			admins.forEach(function(admin) {
-      	adminUsers.push([admin.name,admin.username]); // adds their info to the dbUsers value
+        adminUsers.push([admin.name,admin.username]); 
     	});
-    response.send(adminUsers); // sends dbUsers back to the page
-  });
+      response.send(adminUsers); // sends dbUsers back to the page
+		});
+    response.redirect("/");
   } catch (error) {
     response.status(400).send('Username already exists');
   }
@@ -167,7 +168,7 @@ app.post('/login', async (request, response) => {
 });
 
 app.get("/users", function (request, response) {
-  response.sendFile(__dirname + '/views/user.html');
+  //response.sendFile(__dirname + '/views/user.html');
   var dbUsers=[];
   User.findAll().then(function(users) { // find all entries in the users tables
     users.forEach(function(user) {
