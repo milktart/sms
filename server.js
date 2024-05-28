@@ -45,10 +45,23 @@ sequelize.authenticate()
     });
     
     Admins = sequelize.define('admins', {
-      id: { type: Sequelize.STRING },
-      username: { type: Sequelize.STRING },
-      password: { type: Sequelize.STRING },
-      active: { type: Sequelize.BOOLEAN }
+        id: { 
+          type: DataTypes.UUID,
+          defaultValue: DataTypes.UUIDV4,
+          primaryKey: true, 
+          allowNull: false
+        },
+        username: { 
+          type: Sequelize.STRING, 
+          allowNull: false
+        },
+        password: { 
+          type: Sequelize.STRING, 
+          allowNull: false
+        },
+        active: { 
+          type: Sequelize.BOOLEAN 
+        }
     });
     
     setup();
@@ -59,11 +72,12 @@ sequelize.authenticate()
 
 // populate table with default users
 function setup(){
+  Admins.sync({force: true});
   User.sync({force: true}) // We use 'force: true' in this example to drop the table users if it already exists, and create a new one. You'll most likely want to remove this setting in your own apps
     .then(function(){
       // Add the default users to the database
       for(var i=0; i<users.length; i++){ // loop through all users
-        User.create({ firstName: users[i][0], lastName: users[i][1]}); // create a new entry in the users table
+        //User.create({ firstName: users[i][0], lastName: users[i][1]}); // create a new entry in the users table
       }
     });  
 }
@@ -76,7 +90,12 @@ app.get("/", function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
 
+app.get("/login", function (request, response) {
+  return;
+});
+
 app.get("/users", function (request, response) {
+  response.sendFile(__dirname + '/views/users.html');
   var dbUsers=[];
   User.findAll().then(function(users) { // find all entries in the users tables
     users.forEach(function(user) {
