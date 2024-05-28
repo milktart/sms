@@ -98,7 +98,7 @@ function setup(){
 		  Admins.create({ 
 			  name: "Julian", 
 			  username: "julian", 
-			  password: hashedPW,
+			  password: hashedPassword,
 			  active: 1
 		  });
 	  });
