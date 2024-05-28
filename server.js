@@ -91,8 +91,8 @@ sequelize.authenticate()
   });
 
 // populate table with default users
-function setup(){
-	const hashedPassword = bcrypt.hash(process.env.def_admin, 10);
+async function setup() {
+	const hashedPassword = await bcrypt.hash(process.env.def_admin, 10);
   Admins.sync({force: true})
 	  .then(function(){
 		  Admins.create({ 
