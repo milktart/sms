@@ -149,33 +149,18 @@ app.post('/register', async (request, response) => {
 
 app.post('/login', async (request, response) => {
   const { username, password } = request.body;
-  console.log(request);
-  console.log(request.query);
-  console.log(request.body);
 
   if (!username || !password) {
-	  
-  	console.log(request);
- 	console.log(request.query);
- 	console.log(request.body);
     return response.status(400).send('Username and password are required');
   }
 
   const admin = await Admins.findOne({ username });
   if (!admin) {
-	  
-  console.log(request);
-  console.log(request.query);
-  console.log(request.body);
     return response.status(401).send('Invalid username or password');
   }
 
   const isPasswordValid = await bcrypt.compare(password, admin.password);
   if (!isPasswordValid) {
-	  
-  console.log(request);
-  console.log(request.query);
-  console.log(request.body);
     return response.status(402).send('Invalid username or password');
   }
 
