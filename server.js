@@ -105,6 +105,10 @@ app.get("/", function (request, response) {
   response.sendFile(__dirname + '/views/index.html');
 });
 
+app.get("/register", function (request, response) {
+  response.sendFile(__dirname + '/views/register.html');
+});
+
 app.post('/register', async (request, response) => {
   const { username, password } = request.body;
 
