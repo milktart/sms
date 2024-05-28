@@ -174,7 +174,7 @@ app.post('/login', async (request, response) => {
     return response.status(400).send('Invalid username or password');
   }
 
-  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ userId: admin._id }, JWT_SECRET, { expiresIn: '1h' });
   response.json({ token });
   //response.redirect("/loggedin");
 });
