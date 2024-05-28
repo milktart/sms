@@ -166,17 +166,17 @@ app.post('/login', async (request, response) => {
 
   const admin = await Admins.findOne({ username });
   if (!admin) {
-    return response.status(401).send('Invalid username or password');
+    return response.status(400).send('Invalid username or password');
   }
 
   const isPasswordValid = await bcrypt.compare(password, admin.password);
   if (!isPasswordValid) {
-    return response.status(402).send('Invalid username or password');
+    return response.status(400).send('Invalid username or password');
   }
 
   const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
   response.json({ token });
-  response.redirect("/loggedin");
+  //response.redirect("/loggedin");
 });
 
 app.get("/loggedin", function (request, response) {
