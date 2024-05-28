@@ -11,12 +11,9 @@ $(function() {
 */
 
   $('form').submit(function(event) {
-    alert("logging in")
     event.preventDefault();
     var username = $('input#username').val();
     var password = $('input#password').val();
-    alert(username);
-    alert(password);
     $.post('/login?' + $.param({username:username, password:password}), function() {
       //$('<li></li>').text(fName + " " + lName).appendTo('ul#users');
       $('input#username').val('');
