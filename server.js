@@ -24,7 +24,7 @@ const JWT_SECRET = 'ABC123DEF456';  // Replace with your own secret key
 // Middleware
 app.use(bodyParser.json());
 
-// Mongoose User schema
+/* Mongoose User schema
 mongoose.connect('mongodb://0.0.0.0:27017/userlogin', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const adminSchema = new mongoose.Schema({
@@ -33,6 +33,7 @@ const adminSchema = new mongoose.Schema({
 });
 
 const Admin = mongoose.model('Admin', adminSchema);
+*/
 
 // setup a new database
 // using database credentials set in .env
@@ -64,6 +65,10 @@ sequelize.authenticate()
           type: DataTypes.UUID,
           defaultValue: DataTypes.UUIDV4,
           primaryKey: true, 
+          allowNull: false
+        },
+        name: { 
+          type: Sequelize.STRING, 
           allowNull: false
         },
         username: { 
@@ -110,17 +115,23 @@ app.get("/register", function (request, response) {
 });
 
 app.post('/register', async (request, response) => {
-  const { username, password } = request.body;
+  const { username, password } = request.query;
 
   if (!username || !password) {
     return response.status(400).send('Username and password are required');
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hashedPassword = await bcrypt.hash(request.query.password, 10);
 
   try {
-    const admin = new Admin({ username, password: hashedPassword });
-    await admin.save();
+    Admins.create({ 
+      name: request.query.name, 
+      username: request.query.username, 
+      password: request.query.hashedPassword,
+      active: 1
+    });
+    //const admin = new Admin({ username, password: hashedPassword });
+    //await admin.save();
     response.status(201).send('Admin registered');
   } catch (error) {
     response.status(400).send('Username already exists');
