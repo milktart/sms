@@ -11,6 +11,7 @@ $(function() {
 */
 
   $('form').submit(function(event) {
+    alert("logging in")
     event.preventDefault();
     var username = $('input#username').val();
     var password = $('input#password').val();
