@@ -151,7 +151,7 @@ app.post('/login', async (request, response) => {
   const { username, password } = request.body;
   console.log(request);
   console.log(request.query);
-  console.log(request.query);
+  console.log(request.body);
 
   if (!username || !password) {
     return response.status(400).send('Username and password are required');
