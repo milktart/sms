@@ -137,6 +137,7 @@ app.post('/register', async (request, response) => {
     Admins.findAll().then(function(admins) {
 			admins.forEach(function(admin) {
         adminUsers.push([admin.name,admin.username]); 
+        console.log(admin.name);
     	});
       response.send(adminUsers); // sends dbUsers back to the page
 		});
