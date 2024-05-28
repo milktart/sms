@@ -19,13 +19,13 @@ var users = [
     ];
 var User;
 
-const JWT_SECRET = 'your_secret_key';  // Replace with your own secret key
+const JWT_SECRET = 'ABC123DEF456';  // Replace with your own secret key
 
 // Middleware
 app.use(bodyParser.json());
 
 // Mongoose User schema
-mongoose.connect('mongodb://localhost:27017/userlogin', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://0.0.0.0:27017/userlogin', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const adminSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
