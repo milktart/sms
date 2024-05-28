@@ -149,7 +149,8 @@ app.post('/register', async (request, response) => {
 
 app.post('/login', async (request, response) => {
   const { username, password } = request.body;
-  console.log(request.body);
+  console.log(request);
+  console.log(request.query);
   console.log(request.query);
 
   if (!username || !password) {
