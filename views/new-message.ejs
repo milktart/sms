@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Dashboard</title>
+    <%- include("partials/head") %>
+  </head>
+  <body>
+    <h1>New Message</h1>
+    
+    <nav>
+      <a href="#" onclick="logout();">Log out</a>
+    </nav>
+    
+    <main>
+      <h2></h2>
+      <form id="sendSmsForm">
+        <label for="smsSender">From:</label>
+        <select id="number-selector">
+          <option value="">Select a number</option>
+        </select>
+        <label for="smsRecipient">Recipient:</label>
+        <input type="tel" id="smsRecipient" value="+12128449988" required>
+        <label for="smsContent">Content:</label>
+        <input type="text" id="smsContent" required>
+        <button type="submit">Send SMS</button>
+      </form>
+    </main>
+    
+    <%- include("partials/footer") %>
+      
+    <script>
+      let numbers = getNumbers();
+      numbers.then(function(result) { 
+        console.log(result); 
+      });
+    </script>
+      
+      <!--<input id="phone" type="tel" />
+        <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/intlTelInput.min.js"></script>
+<script>
+  const input = document.querySelector("input[type=tel]");
+  window.intlTelInput(input, {
+    initialCountry: "us",
+  separateDialCode: true,
+    utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/utils.js",
+  });
+</script>-->
+  </body>
+</html>
