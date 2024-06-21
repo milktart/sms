@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Grid</title>
+    <style>
+      * {
+        border: 0px solid black;
+      }
+      
+      html,body {
+        height: 100%;
+        margin: 0;
+      }
+      
+      .container {
+        display: grid;
+        grid-template-columns: [col1] 100% [colend];
+        grid-template-rows: [row1] 33% [row2] auto [row3] 33% [rowend];
+        gap: 0px;
+        padding: 0px;
+        justify-items: center;
+        align-items: center;
+        height: 100%;
+        font-size: 10em;
+      }
+
+      .content {
+        grid-row: 1 / rowend;
+  
+      }
+
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="content">G</section>
+    </main>
+  </body>
+</html>

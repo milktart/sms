@@ -7,10 +7,10 @@
   --color-text-main: #343434;
   --color-primary: #343434;
   --color-contrast: #c0c0c0;
+  --color-light-grey: #e0e0e0;
 }
 
 * {
-  box-sizing: border-box;
   color: var(--color-primary);
 }
 
@@ -18,21 +18,30 @@
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
+.hidden {
+  display: none !important;
+}
+
 body {
   font-family: "Helvetica Neue", helvetica, sans-serif;
-  margin: 25px 0;
+  margin: 25px 0 100px;
   font-size: 14px;
   color: var(--color-primary);
   font-weight: 400;
+  display: grid;
+  grid-template-columns: [col1] 5px [col2] 20% [col3] 1fr [col4] 1fr [col5] 20% [col6] 5px [col7];
+  grid-template-rows: auto;
+  gap: 3px;
 }
 
 footer {
-  width: 100%;
-  margin: 0px !important;
-  padding: 15px;
-  height: 60px;
-  border-top: 1px solid var(--color-primary);
   position: fixed;
+  width: 100%;
+  grid-column: 1 / span 5;
+  margin: 0px !important;
+  padding: 15px 0;
+  height: 30px;
+  border-top: 1px solid var(--color-primary);
   bottom: 0px;
   left: 0px;
   background-color: var(--color-bg);
@@ -59,21 +68,22 @@ p {
 
 form {
   margin-bottom: 25px;
-  padding: 15px;
+
   background-color: white;
   border: 1px solid var(--color-primary);
-  display: inline-block;
-  width: 100%;
+  grid-column: 1 / span 6;
+
   max-width: 340px;
   border-radius: 3px;
 }
 
 input,
 select {
-  display: block;
+  /* display: block; */
+  grid-column: 2 / span 3;
   margin-bottom: 10px;
   padding: 8px;
-  width: 100%;
+
   border: 1px solid var(--color-contrast);
   background-color: white;
   color: var(--color-primary);
@@ -103,40 +113,104 @@ li {
 }
 
 #thread-container div {
-  width: 100%;
-  padding: 10px;
   border-bottom: 1px solid var(--color-primary);
 }
 
-#thread-container div span {
-  display: inline-block;
+.thread-block, .message-block {
+  display: grid;
+  grid-template-columns: [col1] 1fr [col2] 2fr [col3] 1fr [colend];
+  grid-template-rows: [row1] 1.5em [row2] 1fr [rowend];
+  gap: 3px;
   padding: 5px;
 }
 
+.thread-bloack * {
+  border: 1px solid black;
+}
+
 .thread-sender {
-  display: block;
-  position: relative;
-  width: 50%;
-  float: left;
-  overflow: clip;
+  grid-row: 1 / 2;
   font-weight: 500;
 }
 
+.thread-recipient {
+  grid-row: 1 / 2;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .thread-timestamp {
-  display: block;
-  width: 50%;
-  float: left;
-  overflow: clip;
+  grid-row: 1 / 2;
   font-style: oblique;
-  font-size: .9em;
+  font-size: 0.9em;
   text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .thread-preview {
-  display: block;
-  width: 100%;
+  grid-row: 2 / rowend;
+  grid-column: 1 / span 3;
+  align-self: start;
+  height: 2.6em;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.nicejob {
-  text-decoration: line-through;
+.message-header  {
+  position: fixed;
+  width: 100%;
+  grid-column: 1 / span 5;
+  margin: 0px !important;
+  padding: 15px;
+  top: 0px;
+  left: 0px;
+  background-color: var(--color-bg);
+}
+
+.message-header > a > span {
+  float: left;
+  width: 10%;
+  text-align: left;
+}
+
+.message-header-recipients {
+  float: left;
+  width: 75%;
+  text-align: left;
+  font-weight: 500;
+  font-size: 1.1em;
+}
+
+.message-sender-self {
+  text-align: right;
+}
+
+.message-sender {
+  grid-row: 1 / 2;
+  grid-column: 1 / span 2;
+  font-size: .8em;
+}
+
+.message-timestamp {
+  grid-row: 1 / 2;
+  font-style: oblique;
+  font-size: 0.8em;
+  text-align: right;
+}
+
+.message-content {
+  grid-row: 2 / rowend;
+  grid-column: 1 / span 3;
+  align-self: start;
+  background-color: pink;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+main {
+  grid-column: 2 / span 4;
 }

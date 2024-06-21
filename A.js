@@ -157,3 +157,35 @@ app.listen(PORT, async () => {
   await sequelize.sync();
   console.log(`Server is running on port ${PORT}`);
 });
+
+
+
+[
+  {
+    id: "44b51819-9571-4566-adfd-79edaaabe33c",
+    threadId: "7dd9df5e-62c7-4e40-9560-881df2d50efe",
+    profileId: "400189bb-0ea1-4245-84ef-a8a6c7baed89",
+    sender: "+12128449988",
+    recipients: '["+12128449988","+15123330333"]',
+    content: "Testing now",
+    read: false,
+    createdAt: "2024-06-20T11:52:56.569Z",
+    updatedAt: "2024-06-20T11:52:56.569Z",
+    thread: {
+      id: "7dd9df5e-62c7-4e40-9560-881df2d50efe",
+      profileId: "400189bb-0ea1-4245-84ef-a8a6c7baed89",
+      recipients: '["+12128449988","+15123330333"]',
+      count: 1,
+      createdAt: "2024-06-20T11:52:56.553Z",
+      updatedAt: "2024-06-20T11:52:56.553Z",
+    },
+    profile: {
+      id: "400189bb-0ea1-4245-84ef-a8a6c7baed89",
+      e164: "+15123330333",
+      display: "+1-512-3330333",
+      active: true,
+      createdAt: "2024-06-20T11:52:29.166Z",
+      updatedAt: "2024-06-20T11:52:29.166Z",
+    },
+  },
+]

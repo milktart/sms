@@ -27,20 +27,17 @@ const schema = {
       allowNull: false,
     },
   },
-  Numbers: {
+  Profiles: {
     id: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
       allowNull: false,
-    },
-    profileId: {
-      type: DataTypes.UUID,
-      allowNull: false,
+      unique: true,
     },
     e164: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     display: {
       type: DataTypes.STRING,
@@ -59,22 +56,18 @@ const schema = {
       primaryKey: true,
       allowNull: false,
     },
-    numberId: {
+    profileId: {
       type: DataTypes.UUID,
-      allowNull: false,
-    },
-    number: {
-      type: DataTypes.JSON,
       allowNull: false,
     },
     recipients: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    count: { 
-      type: DataTypes.INTEGER, 
+    count: {
+      type: DataTypes.INTEGER,
       defaultValue: 1,
-      autoIncrement: true 
+      autoIncrement: true,
     },
   },
   Permissions: {
@@ -112,11 +105,15 @@ const schema = {
       type: DataTypes.UUID,
       allowNull: false,
     },
+    profileId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
     sender: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    recipient: {
+    recipients: {
       type: DataTypes.JSON,
       allowNull: false,
     },

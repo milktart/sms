@@ -5,20 +5,24 @@
     <%- include("partials/head") %>
   </head>
   <body>
+    <input type="text" value="<%= threadId %>" id="threadId" />
     <select id="number-selector">
       <option value="">Select a number</option>
     </select>
     
     <main>
       <section id="thread-container"></section>
+      <section id="message-container"></section>
     </main>
 
     <%- include("partials/footer") %>
       
     <script>
       let numbers = getNumbers();
-      numbers.then(function(result) { 
-        console.log(result); 
+      $(function () {
+        if (g.i("threadId").value) {
+          //getMessages(g.i("threadId").value, null);
+        }
       });
     </script>
       

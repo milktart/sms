@@ -22,7 +22,7 @@ app.set("views", path.join(__dirname, "views"));
 app.use(bodyParser.json());
 app.use(express.static("public"));
 
-let Admin, Messages, Numbers, Threads, Permissions;
+let Admin, Messages, Profiles, Threads, Permissions;
 
 // setup a new database using database credentials set in .env
 const sequelize = new Sequelize(
@@ -47,17 +47,18 @@ sequelize
   .then(function (err) {
     console.log("Connection has been established successfully.");
 
-    init();
+    const reset = false;
+    init(reset);
   })
   .catch(function (err) {
     console.log("Unable to connect to the database: ", err);
   });
 
 // populate table with default users
-async function init() {
+async function init(reset) {
   Admin = sequelize.define("admins", schema.Admin);
   const hashedPassword = await bcrypt.hash(process.env.def_admin, 10);
-  Admin.sync({ force: true }).then(function () {
+  Admin.sync({ force: reset }).then(function () {
     Admin.create({
       name: "Julian",
       username: "julian",
@@ -66,27 +67,45 @@ async function init() {
     });
   });
 
-  Numbers = sequelize.define("numbers", schema.Numbers);
-  Numbers.sync({ force: true }).then(function () {
-    Numbers.create({ e164: "+15123330333", display: "+1-512-3330333", profileId: "400189bb-0ea1-4245-84ef-a8a6c7baed89" });
-    Numbers.create({ e164: "+15122225151", display: "+1-512-2225151", profileId: "40018a24-2fd8-42d1-8456-b29b0d8aea1c" });
-    Numbers.create({ e164: "+15126775000", display: "+1-512-6775000", profileId: "40018fe8-0baa-4cbc-aee7-59a5cf249335" });
-    Numbers.create({ e164: "+13109101500", display: "+1-310-9101500", profileId: "40018fe8-0c26-4c17-9076-94956c27f21d" });
-  });
-
+  Profiles = sequelize.define("profiles", schema.Profiles);
   Messages = sequelize.define("messages", schema.Messages);
-  Messages.sync({ force: false });
-
   Threads = sequelize.define("threads", schema.Threads);
-  Threads.sync({ force: false });
+  Permissions = sequelize.define("permissions", schema.Permissions);
 
-  Threads.hasMany(Messages, {
-    foreignKey: "threadId",
-  });
+  Threads.hasMany(Messages, { foreignKey: "threadId" });
   Messages.belongsTo(Threads);
 
-  Permissions = sequelize.define("permissions", schema.Permissions);
-  Permissions.sync({ force: true });
+  Profiles.hasMany(Threads, { foreignKey: "profileId" });
+  Threads.belongsTo(Profiles);
+
+  Profiles.hasMany(Messages, { foreignKey: "profileId" });
+  Messages.belongsTo(Profiles);
+
+  Profiles.sync({ force: true }).then(function () {
+    Profiles.create({
+      e164: "+15123330333",
+      display: "+1-512-3330333",
+      id: "400189bb-0ea1-4245-84ef-a8a6c7baed89",
+    });
+    Profiles.create({
+      e164: "+15122225151",
+      display: "+1-512-2225151",
+      id: "40018a24-2fd8-42d1-8456-b29b0d8aea1c",
+    });
+    Profiles.create({
+      e164: "+15126775000",
+      display: "+1-512-6775000",
+      id: "40018fe8-0baa-4cbc-aee7-59a5cf249335",
+    });
+    Profiles.create({
+      e164: "+13109101500",
+      display: "+1-310-9101500",
+      id: "40018fe8-0c26-4c17-9076-94956c27f21d",
+    });
+  });
+  Messages.sync({ force: reset });
+  Threads.sync({ force: reset });
+  Permissions.sync({ force: reset });
 }
 
 // Middleware to verify token
@@ -123,7 +142,7 @@ app.post("/auth", async (req, res) => {
     return res.status(400).send("Invalid username or password");
   }
 
-  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1h" });
+  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1d" });
   res.json({ token });
 });
 
@@ -146,12 +165,12 @@ app.post("/register", authenticateToken, async (req, res) => {
 });
 
 app.get("/dashboard", async (req, res) => {
-  res.render("index");
+  res.render("index", { threadId: "NULL" });
 });
 
 // Get all available numbers to send from
 app.get("/get-nums", authenticateToken, async (req, res) => {
-  const numbers = await Numbers.findAll({
+  const numbers = await Profiles.findAll({
     where: {
       active: true,
     },
@@ -172,11 +191,11 @@ app.post("/send-sms", authenticateToken, async (req, res) => {
       text: content,
     });
 
-    await Messages.create({
+    /*await Messages.create({
       sender: sender,
       recipient: recipient,
       content: content,
-    });
+    });*/
 
     res
       .status(200)
@@ -198,47 +217,50 @@ app.post("/webhook/sms", async (req, res) => {
   recipients.push(from.phone_number);
   recipients.sort();
 
-  const [thread, created] = await Threads.findOrCreate({
-    where: {
-      number: "",
-      numberId: messaging_profile_id,
-      recipients: JSON.stringify(recipients),
-    },
-  });
-
-  try {
-    await Messages.create({
-      threadId: thread.id,
-      sender: from.phone_number,
-      recipient: JSON.stringify(recipients),
-      content: text,
+  if (to[0].status == "delivered" || to[0].status == "webhook_delivered") {
+    const [thread, created] = await Threads.findOrCreate({
+      where: {
+        profileId: messaging_profile_id,
+        recipients: JSON.stringify(recipients),
+      },
     });
 
-    res
-      .status(200)
-      .send({ success: true, message: "SMS received successfully" });
-  } catch (error) {
-    res.status(500).send({
-      success: false,
-      message: "Failed to process incoming SMS",
-      error: error.message,
-    });
+    try {
+      await Messages.create({
+        threadId: thread.id,
+        sender: from.phone_number,
+        profileId: messaging_profile_id,
+        recipients: JSON.stringify(recipients),
+        content: text,
+      });
+
+      res
+        .status(200)
+        .send({ success: true, message: "SMS received successfully" });
+    } catch (error) {
+      res.status(500).send({
+        success: false,
+        message: "Failed to process incoming SMS",
+        error: error.message,
+      });
+    }
   }
 });
 
 // Fetch threads
 app.post("/threads", async (req, res) => {
   const filter = req.body.filter || "";
-  
+
   try {
     const messages = await Messages.findAll({
-      order: sequelize.literal('max(createdAt) DESC'),
+      order: sequelize.literal("max(messages.createdAt) DESC"),
       group: "threadId",
-      where: { 
-        recipient: { [Op.substring]: filter, } 
-      }
+      where: {
+        recipients: { [Op.substring]: filter },
+      },
+      include: [Threads, Profiles],
     });
-    
+
     res.status(200).json(messages);
   } catch (error) {
     res.status(500).send({
@@ -251,15 +273,20 @@ app.post("/threads", async (req, res) => {
 
 // Fetch messages
 app.get("/messages/:threadId", async (req, res) => {
+  res.render("index", { threadId: req.params.threadId });
+});
+
+// Fetch messages
+app.post("/messages/:threadId", async (req, res) => {
   try {
     const messages = await Messages.findAll({
       where: { threadId: req.params.threadId },
       order: [["createdAt", "DESC"]],
     });
 
-    //console.log(messages);
     res.status(200).json(messages);
   } catch (error) {
+    console.log(error);
     res.status(500).send({
       success: false,
       message: "Failed to fetch messages",
@@ -269,11 +296,48 @@ app.get("/messages/:threadId", async (req, res) => {
 });
 
 // Fetch messages
-app.get("/messages", async (req, res) => {
+app.get("/raw/messages", async (req, res) => {
   try {
     const messages = await Messages.findAll({
       order: [["createdAt", "DESC"]],
     });
+
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to fetch messages",
+      error: error.message,
+    });
+  }
+});
+
+// Send raw message as backup
+app.get("/backup", async (req, res) => {
+  try {
+    const response = await fetch("/webhook/sms", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.token}`,
+      },
+      body: JSON.stringify({}),
+    });
+    
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to fetch messages",
+      error: error.message,
+    });
+  }
+});
+
+// Fetch raw threads
+app.get("/raw/threads", async (req, res) => {
+  try {
+    const messages = await Threads.findAll({});
 
     //console.log(messages);
     res.status(200).json(messages);
@@ -286,10 +350,13 @@ app.get("/messages", async (req, res) => {
   }
 });
 
-// Fetch threads
-app.get("/th", async (req, res) => {
+// Fetch raw threads
+app.get("/raw/threads/:threadId", async (req, res) => {
   try {
-    const messages = await Threads.findAll({});
+    const messages = await Threads.findAll({
+      where: { id: req.params.threadId },
+      include: Profiles,
+    });
 
     //console.log(messages);
     res.status(200).json(messages);
@@ -318,6 +385,10 @@ app.get("/sanitize/:number", async (req, res) => {
       error: error.message,
     });
   }
+});
+
+app.get("/grid", async (req, res) => {
+  res.render("grid");
 });
 
 // listen for requests :)

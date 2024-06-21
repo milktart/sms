@@ -9,13 +9,18 @@
     <h1>login.ejs</h1>
     <form id="loginForm">
       <label for="loginUsername">Username:</label>
-      <input type="text" id="loginUsername" required />
+      <input type="text" id="loginUsername" autocorrect="off" autocapitalize="none" required />
       <label for="loginPassword">Password:</label>
       <input type="password" id="loginPassword" required />
       <button type="submit">Login</button>
     </form>
     
     <script>
+      $(function(){
+        //alert(localStorage.token)
+        if (localStorage.token) { window.location.replace("/dashboard"); }
+      });      
+      
       const g = {
         i: (id) => {
           return document.getElementById(id);
