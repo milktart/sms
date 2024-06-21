@@ -315,11 +315,10 @@ app.get("/raw/messages", async (req, res) => {
 // Send raw message as backup
 app.get("/backup", async (req, res) => {
   try {
-    const response = await fetch("/webhook/sms", {
+    const response = await fetch("https://plankton-app-pmbv5.ondigitalocean.app/webhook/sms", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.token}`,
       },
       body: JSON.stringify({}),
     });
