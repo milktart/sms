@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SMS Login</title>
+    <%- include("partials/head") %>
+  </head>
+  
+  <body>
+    <h1>login.ejs</h1>
+    <form id="loginForm">
+      <label for="loginUsername">Username:</label>
+      <input type="text" id="loginUsername" autocorrect="off" autocapitalize="none" required />
+      <label for="loginPassword">Password:</label>
+      <input type="password" id="loginPassword" required />
+      <button type="submit">Login</button>
+    </form>
+    
+    <script>
+      $(function(){
+        //alert(localStorage.token)
+        if (localStorage.token) { window.location.replace("/dashboard"); }
+      });      
+      
+      const g = {
+        i: (id) => {
+          return document.getElementById(id);
+        },
+      };
+      
+      g.i("loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const username = g.i("loginUsername").value;
+        const password = g.i("loginPassword").value;
+        
+        const response = await fetch("/auth", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, password }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          localStorage.setItem("token", data.token);
+          window.location.replace("/dashboard");
+        } else {
+          console.log(data);
+        }
+      });
+    </script>
+  </body>
+</html>

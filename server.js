@@ -2,227 +2,395 @@
 // where your node app starts
 
 // init project
-const express = require('express');
-const Sequelize = require('sequelize');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const path = require("path");
+const { Sequelize, DataTypes, Op } = require("sequelize");
+const bodyParser = require("body-parser");
+const Telnyx = require("telnyx")(process.env.TELNYX_API_KEY);
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const cors = require("cors");
+const schema = require("./schema");
 
+const JWT_SECRET = process.env.JWT_TOKEN;
+
+// Set up application parameters
 const app = express();
-
-// default user list
-var users = [
-      ["John","Hancock"],
-      ["Liz","Smith"],
-      ["Ahmed","Khan"]
-    ];
-var User;
-
-const JWT_SECRET = 'ABC123DEF456';  // Replace with your own secret key
-
-// Middleware
+//app.use(cors());
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
 app.use(bodyParser.json());
+app.use(express.static("public"));
 
-/* Mongoose User schema
-mongoose.connect('mongodb://0.0.0.0:27017/userlogin', { useNewUrlParser: true, useUnifiedTopology: true });
+let Admin, Messages, Profiles, Threads, Permissions;
 
-const adminSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-});
-
-const Admin = mongoose.model('Admin', adminSchema);
-*/
-
-// setup a new database
-// using database credentials set in .env
-var sequelize = new Sequelize('database', process.env.DB_USER, process.env.DB_PASS, {
-  host: '0.0.0.0',
-  dialect: 'sqlite',
-  pool: {
-    max: 5,
-    min: 0,
-    idle: 10000
-  },
-    // Security note: the database is saved to the file `database.sqlite` on the local filesystem. It's deliberately placed in the `.data` directory
-    // which doesn't get copied if someone remixes the project.
-  storage: '.data/database.sqlite'
-});
+// setup a new database using database credentials set in .env
+const sequelize = new Sequelize(
+  "database",
+  process.env.DB_USER,
+  process.env.DB_PASS,
+  {
+    host: "0.0.0.0",
+    dialect: "sqlite",
+    pool: {
+      max: 5,
+      min: 0,
+      idle: 10000,
+    },
+    storage: ".data/database.sqlite",
+  }
+);
 
 // authenticate with the database
-sequelize.authenticate()
-  .then(function(err) {
-    console.log('Connection has been established successfully.');
-    // define a new table 'users'
-    User = sequelize.define('users', {
-      firstName: { type: Sequelize.STRING },
-      lastName: { type: Sequelize.STRING }
-    });
-    
-    Admins = sequelize.define('admins', {
-        id: { 
-          type: Sequelize.UUID,
-          defaultValue: Sequelize.UUIDV4,
-          primaryKey: true, 
-          allowNull: false
-        },
-        name: { 
-          type: Sequelize.STRING, 
-          allowNull: false
-        },
-        username: { 
-          type: Sequelize.STRING, 
-          allowNull: false
-        },
-        password: { 
-          type: Sequelize.STRING, 
-          allowNull: false
-        },
-        active: { 
-          type: Sequelize.BOOLEAN 
-        }
-    });
-    
-    setup();
+sequelize
+  .authenticate()
+  .then(function (err) {
+    console.log("Connection has been established successfully.");
+
+    const reset = false;
+    init(reset);
   })
   .catch(function (err) {
-    console.log('Unable to connect to the database: ', err);
+    console.log("Unable to connect to the database: ", err);
   });
 
 // populate table with default users
-async function setup() {
-	const hashedPassword = await bcrypt.hash(process.env.def_admin, 10);
-  Admins.sync({force: true})
-	  .then(function(){
-		  Admins.create({ 
-			  name: "Julian", 
-			  username: "julian", 
-			  password: hashedPassword,
-			  active: 1
-		  });
-	  });
-	
-  User.sync({force: true}) // We use 'force: true' in this example to drop the table users if it already exists, and create a new one. You'll most likely want to remove this setting in your own apps
-    .then(function(){
-      // Add the default users to the database
-      for(var i=0; i<users.length; i++){ // loop through all users
-        //User.create({ firstName: users[i][0], lastName: users[i][1]}); // create a new entry in the users table
-      }
-    });  
+async function init(reset) {
+  Admin = sequelize.define("admins", schema.Admin);
+  const hashedPassword = await bcrypt.hash(process.env.def_admin, 10);
+  Admin.sync({ force: reset }).then(function () {
+    Admin.create({
+      name: "Julian",
+      username: "julian",
+      password: hashedPassword,
+      active: 1,
+    });
+  });
+
+  Profiles = sequelize.define("profiles", schema.Profiles);
+  Messages = sequelize.define("messages", schema.Messages);
+  Threads = sequelize.define("threads", schema.Threads);
+  Permissions = sequelize.define("permissions", schema.Permissions);
+
+  Threads.hasMany(Messages, { foreignKey: "threadId" });
+  Messages.belongsTo(Threads);
+
+  Profiles.hasMany(Threads, { foreignKey: "profileId" });
+  Threads.belongsTo(Profiles);
+
+  Profiles.hasMany(Messages, { foreignKey: "profileId" });
+  Messages.belongsTo(Profiles);
+
+  Profiles.sync({ force: true }).then(function () {
+    Profiles.create({
+      e164: "+15123330333",
+      display: "+1-512-3330333",
+      id: "400189bb-0ea1-4245-84ef-a8a6c7baed89",
+    });
+    Profiles.create({
+      e164: "+15122225151",
+      display: "+1-512-2225151",
+      id: "40018a24-2fd8-42d1-8456-b29b0d8aea1c",
+    });
+    Profiles.create({
+      e164: "+15126775000",
+      display: "+1-512-6775000",
+      id: "40018fe8-0baa-4cbc-aee7-59a5cf249335",
+    });
+    Profiles.create({
+      e164: "+13109101500",
+      display: "+1-310-9101500",
+      id: "40018fe8-0c26-4c17-9076-94956c27f21d",
+    });
+  });
+  Messages.sync({ force: reset });
+  Threads.sync({ force: reset });
+  Permissions.sync({ force: reset });
 }
 
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
+// Middleware to verify token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (token == null) return res.sendStatus(401);
 
-// http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (request, response) {
-  response.sendFile(__dirname + '/views/index.html');
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+app.get("/", (req, res) => {
+  res.render("login");
 });
 
-app.get("/register", function (request, response) {
-  response.sendFile(__dirname + '/views/register.html');
-});
-
-app.post('/register', async (request, response) => {
-  const { username, password } = request.query;
+app.post("/auth", async (req, res) => {
+  const { username, password } = req.body;
 
   if (!username || !password) {
-    return response.status(400).send('Username and password are required');
+    return res.status(400).send("Username and password are required");
   }
 
-  const hashedPassword = await bcrypt.hash(request.query.password, 10);
+  const user = await Admin.findOne({ username });
+  if (!user) {
+    return res.status(400).send("Invalid username or password");
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return res.status(400).send("Invalid username or password");
+  }
+
+  const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: "1d" });
+  res.json({ token });
+});
+
+app.post("/register", authenticateToken, async (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).send("Username and password are required");
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    Admins.create({ 
-      name: request.query.name, 
-      username: request.query.username, 
-      password: hashedPassword,
-      active: 1
-    });
-    //const admin = new Admin({ username, password: hashedPassword });
-    //await admin.save();
-    response.status(201).send('Admin registered');
-    var adminUsers=[];
-    Admins.findAll().then(function(admins) {
-			admins.forEach(function(admin) {
-        adminUsers.push([admin.name,admin.username]); 
-        console.log(admin.name);
-    	});
-      response.send(adminUsers); // sends dbUsers back to the page
-		});
-    response.redirect("/");
+    const user = new Admin({ username, password: hashedPassword });
+    await user.save();
+    res.status(201).send("User registered");
   } catch (error) {
-    response.status(400).send('Username already exists');
+    res.status(400).send("Username already exists");
   }
 });
 
-app.post('/login', async (request, response) => {
-  const { username, password } = request.query;
-
-  if (!username || !password) {
-    return response.status(400).send('Username and password are required');
-  }
-
-  const admin = await Admins.findOne({ username });
-  if (!admin) {
-    return response.status(400).send('Invalid username or password');
-  }
-
-  const isPasswordValid = await bcrypt.compare(password, admin.password);
-  if (!isPasswordValid) {
-    return response.status(400).send('Invalid username or password');
-  }
-
-  const token = jwt.sign({ userId: admin._id }, JWT_SECRET, { expiresIn: '1h' });
-  response.json({ token });
-  //response.redirect("/loggedin");
+app.get("/dashboard", async (req, res) => {
+  res.render("index", { threadId: "NULL" });
 });
 
-app.get("/loggedin", function (request, response) {
-  var dbUsers=[];
-  Admins.findAll().then(function(users) { // find all entries in the users tables
-    users.forEach(function(user) {
-      console.log(user.name);
-      alert(user.name);
-      dbUsers.push([user.name,user.username]); // adds their info to the dbUsers value
-    });
-    response.send(dbUsers); // sends dbUsers back to the page
+// Get all available numbers to send from
+app.get("/get-nums", authenticateToken, async (req, res) => {
+  const numbers = await Profiles.findAll({
+    where: {
+      active: true,
+    },
   });
+
+  //console.log("All numbers:", JSON.stringify(numbers, null, 2));
+  res.json({ numbers });
 });
 
-app.get("/users", function (request, response) {
-  //response.sendFile(__dirname + '/views/user.html');
-  var dbUsers=[];
-  User.findAll().then(function(users) { // find all entries in the users tables
-    users.forEach(function(user) {
-      dbUsers.push([user.firstName,user.lastName]); // adds their info to the dbUsers value
+// Outbound SMS route
+app.post("/send-sms", authenticateToken, async (req, res) => {
+  const { sender, recipient, content } = req.body;
+
+  try {
+    const message = await Telnyx.messages.create({
+      from: sender,
+      to: recipient,
+      text: content,
     });
-    response.send(dbUsers); // sends dbUsers back to the page
-  });
+
+    /*await Messages.create({
+      sender: sender,
+      recipient: recipient,
+      content: content,
+    });*/
+
+    res
+      .status(200)
+      .send({ success: true, message: "SMS sent successfully", data: message });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to send SMS",
+      error: error.message,
+    });
+  }
 });
 
-// creates a new entry in the users table with the submitted values
-app.post("/users", function (request, response) {
-  User.create({ firstName: request.query.fName, lastName: request.query.lName});
-  response.sendStatus(200);
+// Inbound SMS webhook
+app.post("/webhook/sms", async (req, res) => {
+  const { from, to, text, messaging_profile_id } = req.body.data.payload;
+  console.log(req.body.data.payload);
+  const recipients = to.map((item) => item.phone_number);
+  recipients.push(from.phone_number);
+  recipients.sort();
+
+  if (to[0].status == "delivered" || to[0].status == "webhook_delivered") {
+    const [thread, created] = await Threads.findOrCreate({
+      where: {
+        profileId: messaging_profile_id,
+        recipients: JSON.stringify(recipients),
+      },
+    });
+
+    try {
+      await Messages.create({
+        threadId: thread.id,
+        sender: from.phone_number,
+        profileId: messaging_profile_id,
+        recipients: JSON.stringify(recipients),
+        content: text,
+      });
+
+      res
+        .status(200)
+        .send({ success: true, message: "SMS received successfully" });
+    } catch (error) {
+      res.status(500).send({
+        success: false,
+        message: "Failed to process incoming SMS",
+        error: error.message,
+      });
+    }
+  }
 });
 
-// drops the table users if it already exists, populates new users table it with just the default users.
-app.get("/reset", function (request, response) {
-  setup();
-  response.redirect("/");
+// Fetch threads
+app.post("/threads", async (req, res) => {
+  const filter = req.body.filter || "";
+
+  try {
+    const messages = await Messages.findAll({
+      order: sequelize.literal("max(messages.createdAt) DESC"),
+      group: "threadId",
+      where: {
+        recipients: { [Op.substring]: filter },
+      },
+      include: [Threads, Profiles],
+    });
+
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to fetch messages",
+      error: error.message,
+    });
+  }
 });
 
-// removes all entries from the users table
-app.get("/clear", function (request, response) {
-  User.destroy({where: {}});
-  response.redirect("/");
+// Fetch messages
+app.get("/messages/:threadId", async (req, res) => {
+  res.render("index", { threadId: req.params.threadId });
+});
+
+// Fetch messages
+app.post("/messages/:threadId", async (req, res) => {
+  try {
+    const messages = await Messages.findAll({
+      where: { threadId: req.params.threadId },
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json(messages);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Failed to fetch messages",
+      error: error.message,
+    });
+  }
+});
+
+// Fetch messages
+app.get("/raw/messages", async (req, res) => {
+  try {
+    const messages = await Messages.findAll({
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to fetch messages",
+      error: error.message,
+    });
+  }
+});
+
+// Send raw message as backup
+app.get("/backup", async (req, res) => {
+  try {
+    const response = await fetch("https://plankton-app-pmbv5.ondigitalocean.app/webhook/sms", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    });
+    
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to fetch messages",
+      error: error.message,
+    });
+  }
+});
+
+// Fetch raw threads
+app.get("/raw/threads", async (req, res) => {
+  try {
+    const messages = await Threads.findAll({});
+
+    //console.log(messages);
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to fetch messages",
+      error: error.message,
+    });
+  }
+});
+
+// Fetch raw threads
+app.get("/raw/threads/:threadId", async (req, res) => {
+  try {
+    const messages = await Threads.findAll({
+      where: { id: req.params.threadId },
+      include: Profiles,
+    });
+
+    //console.log(messages);
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to fetch messages",
+      error: error.message,
+    });
+  }
+});
+
+// Sanitize number
+app.get("/sanitize/:number", async (req, res) => {
+  const number = req.params.number;
+
+  try {
+    //res.json(req.params);
+    const sanitized = number.substring(number.indexOf(";") + 1, number.length);
+
+    res.status(200).json(sanitized);
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to sanitize number",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/grid", async (req, res) => {
+  res.render("grid");
 });
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
+const listener = app.listen(process.env.PORT, function () {
+  console.log("Your app is listening on port " + listener.address().port);
 });
-
-
