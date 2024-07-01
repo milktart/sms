@@ -6,14 +6,13 @@
   </head>
   
   <body>
-    <h1>login.ejs</h1>
-    <form id="loginForm">
-      <label for="loginUsername">Username:</label>
-      <input type="text" id="loginUsername" autocorrect="off" autocapitalize="none" required />
-      <label for="loginPassword">Password:</label>
-      <input type="password" id="loginPassword" required />
-      <button type="submit">Login</button>
-    </form>
+    <section id="login-wrapper" class="core-container">
+      <form id="loginForm">
+        <input type="text" id="loginUsername" placeholder="username" autocorrect="off" autocapitalize="none" required />
+        <input type="password" id="loginPassword" placeholder="password" required />
+        <button type="submit">Login</button>
+      </form>
+    </section>
     
     <script>
       $(function(){

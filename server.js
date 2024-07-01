@@ -216,6 +216,19 @@ app.post("/webhook/sms", async (req, res) => {
   const recipients = to.map((item) => item.phone_number);
   recipients.push(from.phone_number);
   recipients.sort();
+  
+  try {
+    let profile = await Profiles.findAll({
+      attributes: [ "e164" ],
+      where: { id: messaging_profile_id },
+    });
+    
+    if (recipients.indexOf(profile[0].e164) > -1) {
+      recipients.splice(recipients.indexOf(profile[0].e164), 1);
+    }
+
+  } catch (error) { console.log(error); }
+
 
   if (to[0].status == "delivered" || to[0].status == "webhook_delivered") {
     const [thread, created] = await Threads.findOrCreate({
@@ -234,9 +247,7 @@ app.post("/webhook/sms", async (req, res) => {
         content: text,
       });
 
-      res
-        .status(200)
-        .send({ success: true, message: "SMS received successfully" });
+      res.status(200).send({ success: true, message: "SMS received successfully" });
     } catch (error) {
       res.status(500).send({
         success: false,
@@ -258,7 +269,7 @@ app.post("/threads", async (req, res) => {
       where: {
         recipients: { [Op.substring]: filter },
       },
-      include: [Threads, Profiles],
+      include: [ Threads, Profiles ],
     });
 
     res.status(200).json(messages);
@@ -281,7 +292,8 @@ app.post("/messages/:threadId", async (req, res) => {
   try {
     const messages = await Messages.findAll({
       where: { threadId: req.params.threadId },
-      order: [["createdAt", "DESC"]],
+      order: [["createdAt", "ASC"]],
+      include: [ Threads, Profiles ]
     });
 
     res.status(200).json(messages);
@@ -312,31 +324,12 @@ app.get("/raw/messages", async (req, res) => {
   }
 });
 
-// Send raw message as backup
-app.get("/backup", async (req, res) => {
-  try {
-    const response = await fetch("https://plankton-app-pmbv5.ondigitalocean.app/webhook/sms", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({}),
-    });
-    
-    res.status(200).json(response);
-  } catch (error) {
-    res.status(500).send({
-      success: false,
-      message: "Failed to fetch messages",
-      error: error.message,
-    });
-  }
-});
-
 // Fetch raw threads
 app.get("/raw/threads", async (req, res) => {
   try {
-    const messages = await Threads.findAll({});
+    const messages = await Threads.findAll({
+      include: [ Profiles ],
+    });
 
     //console.log(messages);
     res.status(200).json(messages);
@@ -354,10 +347,9 @@ app.get("/raw/threads/:threadId", async (req, res) => {
   try {
     const messages = await Threads.findAll({
       where: { id: req.params.threadId },
-      include: Profiles,
+      include: [ Profiles ],
     });
 
-    //console.log(messages);
     res.status(200).json(messages);
   } catch (error) {
     res.status(500).send({
@@ -388,6 +380,21 @@ app.get("/sanitize/:number", async (req, res) => {
 
 app.get("/grid", async (req, res) => {
   res.render("grid");
+});
+
+app.all("/logs", async (req, res) => {
+  console.log(req);
+  
+  try {
+    res.status(200).send({ success: true, message: "SMS received successfully", data: req.params });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to capture logs",
+      error: error.message,
+    });
+  }
+  
 });
 
 // listen for requests :)

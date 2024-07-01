@@ -14,11 +14,6 @@
   color: var(--color-primary);
 }
 
-html, body {
-  height: 100%;
-  margin: 0;
-}
-
 .material-symbols-rounded {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
@@ -29,37 +24,32 @@ html, body {
 
 body {
   font-family: "Helvetica Neue", helvetica, sans-serif;
+  margin: 25px 0 100px;
   font-size: 14px;
   color: var(--color-primary);
   font-weight: 400;
   display: grid;
   grid-template-columns: [col1] 5px [col2] 20% [col3] 1fr [col4] 1fr [col5] 20% [col6] 5px [col7];
-  grid-template-rows: [pagetop] auto [row2] 60px [pageend];
+  grid-template-rows: auto;
   gap: 3px;
 }
 
 .core-container {
   grid-column: 2 / span 4;
-  grid-row: 1 / span 1;
   display: grid;
-  grid-template-columns: [col1] 5px [col2] 20% [col3] 1fr [col4] 1fr [col5] 20% [col6] 5px [col7];
-  grid-template-rows: [pagetop] 60px [row1] auto [row2] 60px [pageend];
-  gap: 3px;
-}
-
-.core-container header {
-  grid-column: 1 / row3;
-  grid-row: pagetop / row1;
-  align-content: center;
 }
 
 footer {
-  grid-column: 1 / span 6;
-  grid-row: row2 / pageend;
+  position: fixed;
+  width: 100%;
+  grid-column: 1 / span 5;
   margin: 0px !important;
+  padding: 15px 0;
+  height: 30px;
   border-top: 1px solid var(--color-primary);
+  bottom: 0px;
+  left: 0px;
   background-color: var(--color-bg);
-  align-content: space-evenly;
 }
 
 footer > a > span {
@@ -75,13 +65,21 @@ h1 {
 
 .b { font-weight: bold; }
 
+p {
+  max-width: 600px;
+}
+
 form {
   margin-bottom: 25px;
   background-color: white;
+  border: 1px solid var(--color-primary);
+  grid-column: 1 / span 6;
+  max-width: 340px;
   border-radius: 3px;
 }
 
 input, select {
+  grid-column: 2 / span 4;
   margin-bottom: 10px;
   padding: 8px;
   border: 1px solid var(--color-contrast);
@@ -108,26 +106,24 @@ button:active {
   box-shadow: none;
 }
 
-#thread-container {
-  grid-row: row1 / span 3;
-  grid-column: col1 / row3;
-}
-
-#message-container {
-  grid-row: row1 / span 2;
-  grid-column: col1 / col7;
+li {
+  margin-bottom: 5px;
 }
 
 #thread-container div {
   border-bottom: 1px solid var(--color-primary);
 }
 
-.thread-block, .message-block {
+.thread-block, .message-block, #message-send-container {
   display: grid;
   grid-template-columns: [col1] 1fr [col2] 2fr [col3] 1fr [colend];
   grid-template-rows: [row1] 1.5em [row2] 1fr [rowend];
   gap: 3px;
   padding: 5px;
+}
+
+.thread-bloack * {
+  border: 1px solid black;
 }
 
 .thread-sender {
@@ -163,13 +159,20 @@ button:active {
 }
 
 .message-header  {
+  position: fixed;
+  width: 100%;
+  grid-column: 1 / span 5;
+  margin: 0px !important;
+  padding: 15px;
+  top: 0px;
+  left: 0px;
   background-color: var(--color-bg);
 }
 
 .message-header > a > span {
   float: left;
   width: 10%;
-  text-align: center;
+  text-align: left;
 }
 
 .message-header-recipients {
@@ -206,23 +209,27 @@ button:active {
   padding: 10px;
 }
 
-#smsContent {
-  display: inline-block;
-  width: 100%;
-  padding-right: 20px;
-  margin-bottom: 0px;
-  height: 50%;
-}
-
 #message-send-container {
-  display: -webkit-flex;
-  grid-row: row2 / pageend;
-  grid-column: col1 / col7;
-  align-items: center;
+  position: fixed;
+  grid-column: 1 / span 6;
+  margin: 0px !important;
+  padding: 10px;
+  height: 30px;
+  border-top: 1px solid var(--color-light-grey);
+  bottom: 70px;
+  left: 0px;
 }
 
-.message-send-button {
-  position: absolute;
-  right: 15px;
-  cursor: pointer;
+.xmessage-content-container {
+  grid-column: 2 / col6;
+  border: 1px solid black;
+}
+
+#xmessage-send-container .message-content-container input {
+  display: inline-block;
+  width: 90%;
+}
+
+main {
+  grid-column: 2 / span 4;
 }
