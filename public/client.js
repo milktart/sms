@@ -60,12 +60,17 @@ $(function () {
     });
   }
 
-  if (g.i("sendSmsForm")) {
-    g.i("sendSmsForm").addEventListener("submit", async (event) => {
+  if (g.i("smsButton")) {
+    alert("found button !")
+    g.i("smsButton").addEventListener("click", async (event) => {
       event.preventDefault();
       const sender = g.i("smsSender").value;
       const recipient = g.i("smsRecipient").value;
       const content = g.i("smsContent").value;
+      
+      alert(sender);
+      alert(recipient)
+      alert(content);
 
       const response = await fetch("/send-sms", {
         method: "POST",
@@ -90,16 +95,16 @@ $(function () {
   }
 
   if (g.i("threadId") && g.i("threadId").value != "NULL") {
-    getMessages(g.i("threadId").value, null);
+    getMessages(g.i("threadId").value);
   }
 });
 
 // Get all threads
 const getThreads = async (event) => {
   const filter = event || "";
-  g.i("thread-container").classList.remove("hidden");
-  g.i("message-container").classList.add("hidden");
-  g.i("threadId").value = "NULL"
+  g.i("threads-wrapper").classList.remove("hidden");
+  g.i("messages-wrapper").classList.add("hidden");
+  //g.i("threadId").value = "NULL"
   history.pushState({}, null, "/dashboard");
 
   const response = await fetch("/threads", {
@@ -112,23 +117,17 @@ const getThreads = async (event) => {
   })
     .then((response) => response.json())
     .then((data) => {
-      //alert(JSON.stringify(data))
       const section = g.i("thread-container");
       section.innerHTML = "";
 
-      function buildThreadBlock(thread, account) {
+      function buildThreadBlock(thread) {
         const container = document.createElement("div");
         container.setAttribute("class", "thread-block");
         container.setAttribute("data-threadid", thread.threadId);
         container.setAttribute("data-thread-account", thread.profile.e164);
         container.setAttribute("data-thread-from", thread.sender);
         container.setAttribute("data-thread-recipient", thread.recipients);
-        let recipients = JSON.parse(thread.recipients);
-
-        if (recipients.indexOf(thread.sender) > -1) {
-          recipients.splice(recipients.indexOf(account), 1);
-        }
-        container.setAttribute("data-thread-to", recipients);
+        container.setAttribute("data-thread-to", thread.recipients);
 
         const sender = document.createElement("span");
         sender.setAttribute("class", "thread-sender");
@@ -137,7 +136,7 @@ const getThreads = async (event) => {
 
         const recipient = document.createElement("span");
         recipient.setAttribute("class", "thread-recipient");
-        recipient.textContent = recipients;
+        recipient.textContent = JSON.parse(thread.recipients);
         container.appendChild(recipient);
 
         const timestamp = document.createElement("span");
@@ -153,24 +152,16 @@ const getThreads = async (event) => {
         section.appendChild(container);
       }
 
-      let numbers = localStorage.getItem("all-accounts").split(",");
-
       data.forEach((thread) => {
-        let recipients = JSON.parse(thread.recipients);
-
-        recipients.forEach((recipient) => {
-          if (numbers.includes(recipient)) {
-            buildThreadBlock(thread, recipient);
-          }
-        });
+        buildThreadBlock(thread);
       });
 
       const threadList = g.a(".thread-block");
       for (let i = 0; i < threadList.length; i++) {
         threadList[i].addEventListener("click", async (event) => {
+          g.i("messages-wrapper").innerHTML = "";
           getMessages(
-            threadList[i].getAttribute("data-threadid"),
-            threadList[i]
+            threadList[i].getAttribute("data-threadid")
           );
         });
       }
@@ -194,22 +185,73 @@ const sendSMS = async (event) => {
     body: JSON.stringify({ sender, recipient, content }),
   })
     .then((response) => response.json())
-    .then((data) => {})
+    .then((data) => {
+      let message = "";
+      
+      buildMessages([
+        {
+          "id": null,
+          "threadId": g.i("smsThreadId").value,
+          "sender": sender,
+          "recipient": recipient,
+          "createdAt": new Date(),
+          "content": content,
+          "profile": {
+            "e164": sender
+          }
+        }
+      ]);
+      
+      g.i("smsContent").value = "";
+    })
     .catch((error) => {
       alert("Error fetching data:", error);
     });
-
-  getMessages(g.i("smsThreadId").value, g.i("smsThread").value);
 };
 
 // Get all messages in a thread
-const getMessages = async (threadId, thread) => {
-  history.pushState({}, null, "/messages/" + threadId);
-  const metadata = await buildMetadata(threadId);
-  console.log(metadata)
+const buildMessages = async (data) => {
+  const container = g.i("messages-container");
 
-  const section = g.i("message-container");
-  section.innerHTML = "";
+  data.forEach((msg) => {
+    const message = document.createElement("article");
+    message.setAttribute("class", "message-block");
+    message.setAttribute("data-messageid", msg.id);
+    message.setAttribute("data-message-threadid", msg.threadId);
+    message.setAttribute("data-message-from", msg.sender);
+    message.setAttribute("data-message-to", msg.recipient);
+
+    const sender = document.createElement("span");
+    sender.setAttribute("class", "message-sender");
+    sender.textContent = msg.sender;
+    message.appendChild(sender);
+
+    const timestamp = document.createElement("span");
+    timestamp.setAttribute("class", "message-timestamp");
+    timestamp.textContent = formatDateTime(msg.createdAt, "message");
+    message.appendChild(timestamp);
+
+    const content = document.createElement("span");
+    content.setAttribute("class", "message-content");
+    content.textContent = msg.content;
+    if (msg.sender == msg.profile.e164) {
+      content.setAttribute("class", "message-content message-sender-self");
+    }
+
+    message.appendChild(content);
+    container.appendChild(message);
+  });
+
+};
+
+// Get all messages in a thread
+const getMessages = async (threadId) => {
+  history.pushState({}, null, "/messages/" + threadId);
+  g.i("threadId").value = threadId;
+
+  //const section = g.i("message-container");
+  const wrapper = g.i("messages-wrapper");
+  
 
   const response = await fetch("/messages/" + threadId, {
     method: "POST",
@@ -220,54 +262,43 @@ const getMessages = async (threadId, thread) => {
   })
     .then((response) => response.json())
     .then((data) => {
-      g.i("thread-container").classList.add("hidden");
-      g.i("message-container").classList.remove("hidden");
-
-      const header = document.createElement("section");
+      g.i("threads-wrapper").classList.add("hidden");
+      wrapper.classList.remove("hidden");
+      wrapper.innerHTML = "";
+  
+      const section = document.createElement("section");
+      section.setAttribute("id", "message-container");
+      wrapper.appendChild(section);
+      
+      if (g.i("message-header")) g.i("message-header").remove();
+      
+      const recipients = JSON.parse(data[0].recipients);
+      const header = document.createElement("header");
       header.setAttribute("class", "message-header");
+      header.setAttribute("id", "message-header");
       header.setAttribute("data-messageid", threadId);
-      header.innerHTML = `<a href="#" onclick="getThreads();"><span class="material-symbols-rounded">arrow_back_ios</span></a><span class="message-header-recipients"></span>`;
+      header.innerHTML = `<a href="#" onclick="getThreads();"><span class="material-symbols-rounded">arrow_back_ios</span></a><span class="message-header-recipients">${recipients}</span>`;
 
-      section.appendChild(header);
+      wrapper.insertBefore(header, wrapper.children[0]);
+      section.innerHTML = "";
+      
+      const container = document.createElement("section");
+      container.setAttribute("class", "messages-container");
+      container.setAttribute("id", "messages-container");
+      section.appendChild(container);
 
-      data.forEach((message) => {
-        const container = document.createElement("article");
-        container.setAttribute("class", "message-block");
-        container.setAttribute("data-messageid", message.id);
-        container.setAttribute("data-message-threadid", message.threadId);
-        //container.setAttribute("data-message-account", thread.getAttribute("data-thread-account"));
-        container.setAttribute("data-message-from", message.sender);
-        container.setAttribute("data-message-to", message.recipient);
-
-        const sender = document.createElement("span");
-        sender.setAttribute("class", "message-sender");
-        sender.textContent = message.sender;
-        container.appendChild(sender);
-
-        const timestamp = document.createElement("span");
-        timestamp.setAttribute("class", "message-timestamp");
-        timestamp.textContent = formatDateTime(message.createdAt, "message");
-        container.appendChild(timestamp);
-
-        const content = document.createElement("span");
-        content.setAttribute("class", "message-content");
-        content.textContent = message.content;
-        if (message.sender == thread.getAttribute("data-thread-account")) {
-        content.setAttribute("class", "message-content message-sender-self");
-        }
-
-        container.appendChild(content);
-
-        section.appendChild(container);
-      });
-
-      section.innerHTML += `
-          <input type="tel" id="smsThreadId" value="${thread.getAttribute("data-threadId")}">
-          <input type="tel" id="smsThread" value="${thread}">
-          <input type="tel" id="smsSender" value="${thread.getAttribute("data-thread-account")}">
-          <input type="tel" id="smsRecipient" value="${thread.getAttribute("data-thread-to")}">
-          <input type="text" id="smsContent" required>
-          <input type="button" value="Send" onclick="sendSMS();" />
+      buildMessages(data);
+    
+      wrapper.innerHTML += `
+        <section id="message-send-container">
+          <input type="hidden" id="smsThreadId" value="${threadId}" />
+          <input type="hidden" id="smsSender" value="${data[0].profile.e164}" />
+          <input type="hidden" id="smsRecipient" value="${recipients}" />
+          <input type="text" id="smsContent" required />
+          <span onclick="sendSMS();" class="message-send-button">
+            <span class="material-symbols-rounded">send</span>
+          </span>
+        </section>
       `;
 
     })
@@ -275,22 +306,6 @@ const getMessages = async (threadId, thread) => {
       console.error("Error fetching data:", error);
     });
 };
-
-const buildMetadata = async (threadId) => {
-  try {
-    const response = await fetch("/raw/threads/" + threadId, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    return await response.json();
-  } catch (error) {
-    console.log(error);
-  }
-}
 
 // Get all phone numbers tied to application
 const getNumbers = async (event) => {
@@ -307,7 +322,6 @@ const getNumbers = async (event) => {
       const isSet = localStorage.getItem("account") || "";
       const recipients = data.numbers.map((item) => item.e164);
       localStorage.setItem("all-accounts", recipients);
-      //alert(localStorage.getItem("all-accounts"));
 
       data.numbers.forEach((number) => {
         const option = document.createElement("option");

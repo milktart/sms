@@ -5,23 +5,31 @@
     <%- include("partials/head") %>
   </head>
   <body>
-    <input type="text" value="<%= threadId %>" id="threadId" />
-    <select id="number-selector">
-      <option value="">Select a number</option>
-    </select>
+    <input type="hidden" value="<%= threadId %>" id="threadId" />
     
-    <main>
+    <section id="threads-wrapper" class="core-container">
+      <header>
+        <section id="selector-container" class="container">
+          <select id="number-selector">
+            <option value="">Select a number</option>
+          </select>
+        </section>
+      </header>
+      
       <section id="thread-container"></section>
+    </section>
+    
+    <section id="messages-wrapper" class="core-container">
       <section id="message-container"></section>
-    </main>
+    </section>
 
     <%- include("partials/footer") %>
       
     <script>
       let numbers = getNumbers();
       $(function () {
-        if (g.i("threadId").value) {
-          //getMessages(g.i("threadId").value, null);
+        if (g.i("threadId").value && g.i("threadId").value != "NULL") {
+          getMessages(g.i("threadId").value);
         }
       });
     </script>
