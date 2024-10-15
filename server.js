@@ -191,11 +191,11 @@ app.post("/send-sms", authenticateToken, async (req, res) => {
       text: content,
     });
 
-    /*await Messages.create({
+    await Messages.create({
       sender: sender,
       recipient: recipient,
       content: content,
-    });*/
+    });
 
     res
       .status(200)
@@ -209,14 +209,29 @@ app.post("/send-sms", authenticateToken, async (req, res) => {
   }
 });
 
+// Outbound SMS route
+function forwardSMS(from, to, text) {
+  console.log("Forwarding SMS...");
+  
+  let content = "[" + from + "]: " + text;
+
+  Telnyx.messages.create({
+    from: to,
+    to: "+12128449988",
+    text: content,
+  });
+}
+
 // Inbound SMS webhook
 app.post("/webhook/sms", async (req, res) => {
-  const { from, to, text, messaging_profile_id } = req.body.data.payload;
+  const { from, to, text, messaging_profile_id, direction } = req.body.data.payload;
   console.log(req.body.data.payload);
   const recipients = to.map((item) => item.phone_number);
   recipients.push(from.phone_number);
   recipients.sort();
   
+  if (direction == "inbound") { forwardSMS(from.phone_number,to[0].phone_number, text); }
+
   try {
     let profile = await Profiles.findAll({
       attributes: [ "e164" ],
