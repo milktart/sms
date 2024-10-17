@@ -47,7 +47,7 @@ sequelize
   .then(function (err) {
     console.log("Connection has been established successfully.");
 
-    const reset = false;
+    const reset = true;
     init(reset);
   })
   .catch(function (err) {
@@ -219,6 +219,8 @@ function forwardSMS(from, to, text) {
     from: to,
     to: "+12128449988",
     text: content,
+    "use_profile_webhooks": false,
+
   });
 }
 
