@@ -47,8 +47,9 @@ sequelize
   .then(function (err) {
     console.log("Connection has been established successfully.");
 
-    const reset = true;
+    const reset = { force: true };
     init(reset);
+  
   })
   .catch(function (err) {
     console.log("Unable to connect to the database: ", err);
@@ -58,7 +59,7 @@ sequelize
 async function init(reset) {
   Admin = sequelize.define("admins", schema.Admin);
   const hashedPassword = await bcrypt.hash(process.env.def_admin, 10);
-  Admin.sync({ force: reset }).then(function () {
+  Admin.sync(reset).then(function () {
     Admin.create({
       name: "Julian",
       username: "julian",
@@ -103,9 +104,10 @@ async function init(reset) {
       id: "40018fe8-0c26-4c17-9076-94956c27f21d",
     });
   });
-  Messages.sync({ force: reset });
-  Threads.sync({ force: reset });
-  Permissions.sync({ force: reset });
+  
+  Messages.sync(reset);
+  Threads.sync(reset);
+  Permissions.sync(reset);
 }
 
 // Middleware to verify token
