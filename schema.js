@@ -31,8 +31,8 @@ const schema = {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
-      allowNull: false,
       unique: true,
+      allowNull: false,
     },
     e164: {
       type: DataTypes.STRING,
