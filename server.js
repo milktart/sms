@@ -49,7 +49,6 @@ sequelize
 
     const reset = { force: true };
     init(reset);
-  
   })
   .catch(function (err) {
     console.log("Unable to connect to the database: ", err);
@@ -82,29 +81,22 @@ async function init(reset) {
   Profiles.hasMany(Messages, { foreignKey: "profileId" });
   Messages.belongsTo(Profiles);
 
-  Profiles.sync({ force: true }).then(function () {
-    Profiles.create({
-      e164: "+15123330333",
-      display: "+1-512-3330333",
-      id: "400189bb-0ea1-4245-84ef-a8a6c7baed89",
-    });
-    Profiles.create({
-      e164: "+15122225151",
-      display: "+1-512-2225151",
-      id: "40018a24-2fd8-42d1-8456-b29b0d8aea1c",
-    });
-    Profiles.create({
-      e164: "+15126775000",
-      display: "+1-512-6775000",
-      id: "40018fe8-0baa-4cbc-aee7-59a5cf249335",
-    });
-    Profiles.create({
-      e164: "+13109101500",
-      display: "+1-310-9101500",
-      id: "40018fe8-0c26-4c17-9076-94956c27f21d",
-    });
+  Profiles.sync({ force: true }).then(async function () {
+    const numbers = await Telnyx.phoneNumbers.list();
+    
+    for (let i = 0; i < numbers.data.length; i++) {
+      let display = "+1-" + (numbers.data[i].phone_number).substr(2,3) + "-" + (numbers.data[i].phone_number).substr(5,7);
+      if (numbers.data[i].messaging_profile_id !== null) {
+        console.log("Creating profile for: " + numbers.data[i].phone_number);
+        Profiles.create({
+          e164: numbers.data[i].phone_number,
+          display: display,
+          id: numbers.data[i].messaging_profile_id,
+        });
+      }
+    }
   });
-  
+
   Messages.sync(reset);
   Threads.sync(reset);
   Permissions.sync(reset);
@@ -214,40 +206,56 @@ app.post("/send-sms", authenticateToken, async (req, res) => {
 // Outbound SMS route
 function forwardSMS(from, to, text) {
   console.log("Forwarding SMS...");
-  
-  let content = "[" + from + "]: " + text;
+
+  //let content = "[" + from + "]: " + text;
 
   Telnyx.messages.create({
     from: to,
-    to: "+12128449988",
-    text: content,
-    "use_profile_webhooks": false,
-
+    to: from,
+    text: text,
+    use_profile_webhooks: false,
   });
 }
 
 // Inbound SMS webhook
 app.post("/webhook/sms", async (req, res) => {
-  const { from, to, text, messaging_profile_id, direction } = req.body.data.payload;
+  const { from, to, text, messaging_profile_id, direction } =
+    req.body.data.payload;
   console.log(req.body.data.payload);
   const recipients = to.map((item) => item.phone_number);
   recipients.push(from.phone_number);
   recipients.sort();
-  
-  if (direction == "inbound") { forwardSMS(from.phone_number,to[0].phone_number, text); }
+
+  if (direction == "inbound") {
+    if (
+      from.phone_number == "+12128449988" &&
+      text.slice(0, 2) + text.slice(13, 15) == "[+]:"
+    ) {
+      console.log("sending reply. NOT forwarding.");
+      let sender = text.slice(1, 13);
+      let body = text.slice(16);
+      forwardSMS(sender, to[0].phone_number, body);
+    } else {
+      forwardSMS(
+        "+12128449988",
+        to[0].phone_number,
+        "[" + from.phone_number + "]: " + text
+      );
+    }
+  }
 
   try {
     let profile = await Profiles.findAll({
-      attributes: [ "e164" ],
+      attributes: ["e164"],
       where: { id: messaging_profile_id },
     });
-    
+
     if (recipients.indexOf(profile[0].e164) > -1) {
       recipients.splice(recipients.indexOf(profile[0].e164), 1);
     }
-
-  } catch (error) { console.log(error); }
-
+  } catch (error) {
+    console.log(error);
+  }
 
   if (to[0].status == "delivered" || to[0].status == "webhook_delivered") {
     const [thread, created] = await Threads.findOrCreate({
@@ -266,7 +274,9 @@ app.post("/webhook/sms", async (req, res) => {
         content: text,
       });
 
-      res.status(200).send({ success: true, message: "SMS received successfully" });
+      res
+        .status(200)
+        .send({ success: true, message: "SMS received successfully" });
     } catch (error) {
       res.status(500).send({
         success: false,
@@ -288,7 +298,7 @@ app.post("/threads", async (req, res) => {
       where: {
         recipients: { [Op.substring]: filter },
       },
-      include: [ Threads, Profiles ],
+      include: [Threads, Profiles],
     });
 
     res.status(200).json(messages);
@@ -312,7 +322,7 @@ app.post("/messages/:threadId", async (req, res) => {
     const messages = await Messages.findAll({
       where: { threadId: req.params.threadId },
       order: [["createdAt", "ASC"]],
-      include: [ Threads, Profiles ]
+      include: [Threads, Profiles],
     });
 
     res.status(200).json(messages);
@@ -347,7 +357,7 @@ app.get("/raw/messages", async (req, res) => {
 app.get("/raw/threads", async (req, res) => {
   try {
     const messages = await Threads.findAll({
-      include: [ Profiles ],
+      include: [Profiles],
     });
 
     //console.log(messages);
@@ -366,7 +376,7 @@ app.get("/raw/threads/:threadId", async (req, res) => {
   try {
     const messages = await Threads.findAll({
       where: { id: req.params.threadId },
-      include: [ Profiles ],
+      include: [Profiles],
     });
 
     res.status(200).json(messages);
@@ -403,9 +413,15 @@ app.get("/grid", async (req, res) => {
 
 app.all("/logs", async (req, res) => {
   console.log(req);
-  
+
   try {
-    res.status(200).send({ success: true, message: "SMS received successfully", data: req.params });
+    res
+      .status(200)
+      .send({
+        success: true,
+        message: "SMS received successfully",
+        data: req.params,
+      });
   } catch (error) {
     res.status(500).send({
       success: false,
@@ -413,7 +429,20 @@ app.all("/logs", async (req, res) => {
       error: error.message,
     });
   }
-  
+});
+
+// Get all available numbers to send from
+app.get("/dev", async (req, res) => {
+  console.log("listing phone numbers...");
+
+  // listing phone numbers
+
+  const numbers = await Telnyx.phoneNumbers.list();
+
+  //res.status(200).send({ data: numbers });
+  console.log(numbers.data.length)
+  //console.log(JSON.stringify(numbers.data, null, 2));
+  res.json({ numbers });
 });
 
 // listen for requests :)
