@@ -56,6 +56,7 @@ sequelize
 
 // populate table with default users
 async function init(reset) {
+  console.log("Building Admins table.");
   Admin = sequelize.define("admins", schema.Admin);
   const hashedPassword = await bcrypt.hash(process.env.def_admin, 10);
   Admin.sync(reset).then(function () {
@@ -66,22 +67,25 @@ async function init(reset) {
       active: 1,
     });
   });
-
+  
+  console.log("Defining tables.");
   Profiles = sequelize.define("profiles", schema.Profiles);
   Messages = sequelize.define("messages", schema.Messages);
   Threads = sequelize.define("threads", schema.Threads);
   Permissions = sequelize.define("permissions", schema.Permissions);
 
+  console.log("Associating Threads to Messages.");
   Threads.hasMany(Messages, { foreignKey: "threadId" });
   Messages.belongsTo(Threads);
 
+  console.log("Associating Profiles to Threads.");
   Profiles.hasMany(Threads, { foreignKey: "profileId" });
   Threads.belongsTo(Profiles);
 
   Profiles.hasMany(Messages, { foreignKey: "profileId" });
   Messages.belongsTo(Profiles);
 
-  Profiles.sync({ force: true }).then(async function () {
+  Profiles.sync({ force: false }).then(async function () {
     const numbers = await Telnyx.phoneNumbers.list();
     
     for (let i = 0; i < numbers.data.length; i++) {
