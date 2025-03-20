@@ -85,7 +85,7 @@ async function init(reset) {
   Profiles.hasMany(Messages, { foreignKey: "profileId" });
   Messages.belongsTo(Profiles);
 
-  Profiles.sync({ force: false }).then(async function () {
+  Profiles.sync().then(async function () {
     const numbers = await Telnyx.phoneNumbers.list();
     
     for (let i = 0; i < numbers.data.length; i++) {
@@ -231,8 +231,9 @@ app.post("/webhook/sms", async (req, res) => {
   recipients.sort();
 
   if (direction == "inbound") {
+    console.log("Inbound SMS");
     if (
-      from.phone_number == "+12128449988" &&
+      (from.phone_number == "+12128449988" || from.phone_number == "+16179100010" )&&
       text.slice(0, 2) + text.slice(13, 15) == "[+]:"
     ) {
       console.log("sending reply. NOT forwarding.");
@@ -240,8 +241,9 @@ app.post("/webhook/sms", async (req, res) => {
       let body = text.slice(16);
       forwardSMS(sender, to[0].phone_number, body);
     } else {
+      console.log("Forwarding inbound SMS");
       forwardSMS(
-        "+12128449988",
+        "+16179100010",
         to[0].phone_number,
         "[" + from.phone_number + "]: " + text
       );
