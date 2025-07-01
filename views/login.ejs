@@ -1,20 +1,67 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>SMS Login</title>
+    <title>Login</title>
     <%- include("partials/head") %>
   </head>
   
   <body>
-    <section id="login-wrapper" class="core-container">
-      <form id="loginForm">
-        <input type="text" id="loginUsername" placeholder="username" autocorrect="off" autocapitalize="none" required />
-        <input type="password" id="loginPassword" placeholder="password" required />
-        <button type="submit">Login</button>
-      </form>
-    </section>
+    
+    <div class="login-wrapper">
+      <div class="login-container">
+        <p>
+          Messages
+        </p>
+        <form id="loginForm">
+          <input type="text" id="loginUsername" placeholder="username" autocorrect="off" autocapitalize="none" required />
+          <input type="password" id="loginPassword" placeholder="password" required />
+          <button type="submit" class="">Login</button>
+        </form>
+        </div>
+    </div>
     
     <script>
+      // Redirect to dashboard if token already exists
+      $(function () {
+        if (localStorage.token) {
+          //window.location.replace("/dashboard");
+        }
+      });
+
+      // Shortcut for getting element by ID
+      const g = {
+        i: id => document.getElementById(id),
+      };
+
+      // Handle login form submission
+      g.i("loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const username = g.i("loginUsername").value;
+        const password = g.i("loginPassword").value;
+
+        try {
+          const response = await fetch("/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const data = await response.json();
+          
+
+          if (response.ok) {
+            localStorage.setItem("token", data.token);
+            window.location.replace("/dashboard");
+          } else {
+            console.error("Login failed:", data);
+          }
+        } catch (error) {
+          console.error("Error logging in:", error);
+        }
+      });
+      
+      /*
       $(function(){
         //alert(localStorage.token)
         if (localStorage.token) { window.location.replace("/dashboard"); }
@@ -47,7 +94,7 @@
         } else {
           console.log(data);
         }
-      });
+      });*/
     </script>
   </body>
 </html>

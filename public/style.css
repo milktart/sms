@@ -1,113 +1,371 @@
-/* styles */
-/* called by your view template */
-
-/* Our default values set as CSS variables */
+/*------------------------------------
+  Root Variables
+------------------------------------*/
 :root {
-  --color-bg: #f8f4ff;
-  --color-text-main: #343434;
   --color-primary: #343434;
   --color-contrast: #c0c0c0;
   --color-light-grey: #e0e0e0;
+  --color-bg: #fffdfb; /* #f8f4ff; #FFFBF4; #FFFCF6 #FFFAF0 */
+  --color-text-main: #000000; /* #343434; */
+  --color-mint: #d7f5ef;
+  --color-accent: #2800ff;
+  --color-sub: #393734; /* #41403d; #666461; */
+  --color-light: #707070; /* #B1B1AF; */
+  --wrapper-height: 100vh;
+  --image-max-width: 300px;
+  --image-margin: 3rem;
+  --font-family: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* Brown Blue Palette */
+  --color-light-blue: #bfc7d3;
+  --color-blue: #839bbf;
+  --color-dark-blue: #001865;
+  --color-light-brown: #ce8c52;
+  --color-dark-brown: #a34c17;
+  --color-peach: #ecccb2;
+  --color-white: #f3f2f0;
 }
 
 * {
-  color: var(--color-primary);
-}
-
-html, body {
-  height: 100%;
+  box-sizing: border-box;
   margin: 0;
-}
-
-.material-symbols-rounded {
-  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
-}
-
-.hidden {
-  display: none !important;
-}
-
-body {
-  font-family: "Helvetica Neue", helvetica, sans-serif;
-  font-size: 14px;
-  color: var(--color-primary);
-  font-weight: 400;
-  display: grid;
-  grid-template-columns: [col1] 5px [col2] 20% [col3] 1fr [col4] 1fr [col5] 20% [col6] 5px [col7];
-  grid-template-rows: [pagetop] auto [row2] 60px [pageend];
-  gap: 3px;
-}
-
-.core-container {
-  grid-column: 2 / span 4;
-  grid-row: 1 / span 1;
-  display: grid;
-  grid-template-columns: [col1] 5px [col2] 20% [col3] 1fr [col4] 1fr [col5] 20% [col6] 5px [col7];
-  grid-template-rows: [pagetop] 60px [row1] auto [row2] 60px [pageend];
-  gap: 3px;
-}
-
-.core-container header {
-  grid-column: 1 / row3;
-  grid-row: pagetop / row1;
-  align-content: center;
-}
-
-footer {
-  grid-column: 1 / span 6;
-  grid-row: row2 / pageend;
-  margin: 0px !important;
-  border-top: 1px solid var(--color-primary);
   background-color: var(--color-bg);
-  align-content: space-evenly;
+  font-family: var(--font-family);
+  font-size: 13px;
+  border: 0px solid black;
 }
 
-footer > a > span {
-  float: left;
-  width: 25%;
+/* Grid Area Assignments */
+.main-head { grid-area: header; }
+.content { grid-area: content; }
+.main-nav { grid-area: nav; }
+.main-footer { grid-area: footer; }
+
+/* Utilities */
+.ta-r { text-align: right; }
+.i { font-style: italic; }
+.w { /* letter-spacing: 0.02em; */ }
+.hidden { display: none !important; }
+.b { font-weight: bold; }
+
+.fw-1 { font-weight: 100; }
+.fw-2 { font-weight: 200; }
+.fw-3 { font-weight: 300; }
+.fw-4 { font-weight: 400; }
+.fw-5 { font-weight: 500; }
+.fw-6 { font-weight: 600; }
+.fw-7 { font-weight: 700; }
+.fw-8 { font-weight: 800; }
+.fw-9 { font-weight: 900; }
+
+/* Header */
+header {
+  border-bottom: 1px solid var(--color-text-main);
+}
+
+/* Navigation */
+nav {
+  border-top: 1px solid var(--color-text-main);
+}
+
+nav ul {
+  list-style: none;
+  padding: 1px 5vw;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: var(--color-text-main);
+  font-size: 1.2em;
+}
+
+/* Layout */
+.wrapper {
+  display: grid;
+  border: 0px solid black;
+  gap: 0;
+  height: var(--wrapper-height);
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 50px auto 50px;
+  grid-template-areas:
+    "header header header header"
+    "content content content content"
+    "nav nav nav nav";
+}
+
+.wrapper > * {
+  padding: 10px;
+}
+
+.login-wrapper {
+  border: 0px solid black;
+  display: grid;
+  margin-top: -100px;
+  gap: 0;
+  height: var(--wrapper-height);
+  grid-template-columns: auto;
+  grid-template-rows: auto;
+  grid-template-areas: "content";
+}
+
+.login-wrapper * {
+  place-self: center;
   text-align: center;
 }
 
+.login-container {
+  max-width: 400px;
+}
+
+.login-container p {
+  font-size: 4em;
+  font-style: obliquea;
+  font-weight: 550;
+  padding: 10px;
+}
+
+.login-wrapper input,
+.login-wrapper button {
+  display: inline-block;
+  max-width: 400px;
+  width: 60vw;
+  border: 1px solid var(--color-light);
+}
+
+.nav-label {
+  display: none;
+}
+
+/* Non-mobile */
+@media (min-width: 700px) {
+  .wrapper {
+    display: grid;
+    gap: 0px;
+    grid-template-columns: repeat(4, 1fr);
+    height: calc(var(--wrapper-height) - 9vh);
+    grid-template-areas:
+      "nav header header header"
+      "nav content content content"
+      "nav content content content"
+      "nav content content content";
+  }
+
+  article.c-1 {
+    grid-template-columns: 1fr;
+  }
+  article.c-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  article.c-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  article.c-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Navigation */
+  nav {
+    border-top: 0;
+    border-right: 1px solid var(--color-text-main);
+  }
+
+  nav ul {
+    display: inline-block !important;
+    padding: 10px;
+    width: 100%;
+  }
+
+  nav ul li a {
+    display: flex !important;
+  }
+
+  nav ul li a span {
+    display: inline-block !important;
+    place-self: center;
+    padding: 5px;
+    font-size: 0.9em;
+  }
+}
+
+/*------------------------------------
+  Typography
+------------------------------------*/
 h1 {
   font-weight: bold;
   color: pink;
 }
 
-.b { font-weight: bold; }
-
-form {
-  margin-bottom: 25px;
-  background-color: white;
-  border-radius: 3px;
+/*------------------------------------
+  Icon Styles
+------------------------------------*/
+.material-symbols-rounded {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
-input, select {
-  margin-bottom: 10px;
-  padding: 8px;
-  border: 1px solid var(--color-contrast);
-  background-color: white;
+/*------------------------------------
+  Moving Background
+------------------------------------*/
+/* The fixed container for the animation */
+.background-animation {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 150vw;
+  height: 100vh;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  filter: blur(40px);
+  background-color: var(--color-white);
+  animation: subtleBackgroundAnimation 60s ease-in-out infinite alternate;
+  z-index: -99;
+}
+
+@keyframes subtleBackgroundAnimation {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.5) rotate(340deg);
+  }
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.6;
+  filter: blur(40px);
+}
+
+.circle1 {
+  width: 300px;
+  height: 300px;
+  background-color: var(--color-light-blue);
+  top: 15%;
+  left: 20%;
+}
+
+.circle2 {
+  width: 450px;
+  height: 450px;
+  background-color: var(--color-dark-blue);
+  top: 30%;
+  left: 65%;
+}
+
+.circle3 {
+  width: 200px;
+  height: 200px;
+  background-color: var(--color-peach);
+  top: 60%;
+  left: 10%;
+}
+
+.circle4 {
+  width: 380px;
+  height: 380px;
+  background-color: var(--color-light-brown);
+  top: 55%;
+  left: 80%;
+}
+
+.circle5 {
+  width: 280px;
+  height: 280px;
+  background-color: var(--color-peach);
+  top: 5%;
+  left: 50%;
+}
+
+.circle6 {
+  width: 150px;
+  height: 150px;
+  background-color: var(--color-dark-brown);
+  top: 80%;
+  left: 30%;
+}
+
+.circle7 {
+  width: 175px;
+  height: 175px;
+  background-color: var(--color-light-blue);
+  top: 70%;
+  left: 60%;
+}
+
+.circle8 {
+  width: 100px;
+  height: 100px;
+  background-color: var(--color-dark-blue);
+  top: 10%;
+  left: 80%;
+}
+
+.circle9 {
+  width: 200px;
+  height: 200px;
+  background-color: var(--color-blue);
+  top: 55%;
+  left: 30%;
+}
+
+.circle10 {
+  width: 50px;
+  height: 50px;
+  background-color: var(--color-light-brown);
+  top: 50%;
+  left: 15%;
+}
+
+.circle11 {
+  width: 200px;
+  height: 200px;
+  background-color: var(--color-dark-brown);
+  top: 35%;
+  left: 45%;
+}
+
+.circle12 {
+  width: 25px;
+  height: 25px;
+  background-color: var(--color-peach);
+  top: 15%;
+  left: 15%;
+}
+
+/*------------------------------------
+  Forms & Buttons
+------------------------------------*/
+form {
+  margin-bottom: 25px;
+}
+
+input, select, button {
+  border: 1px solid var(--color-light);
   color: var(--color-primary);
+  min-width: 200px;
+  margin: 3px auto;
+  padding: 8px;
   border-radius: 3px;
-  font-size: 16px;
 }
 
 button {
-  font-size: 16px;
   border-radius: 3px;
-  background-color: lightgrey;
-  border: 1px solid grey;
-  box-shadow: 1px 1px var(--color-primary);
+  box-shadow: 0.5px 0.5px var(--color-light);
   cursor: pointer;
 }
 
 button:hover {
-  background-color: yellow;
+  background-color: var(--color-light);
+  color: var(--color-white);
+  box-shadow: 0.5px 0.5px var(--color-primary);
 }
 
-button:active {
-  box-shadow: none;
-}
-
+/*------------------------------------
+  Thread & Message Layout
+------------------------------------*/
 #thread-container {
   grid-row: row1 / span 3;
   grid-column: col1 / row3;
@@ -122,7 +380,8 @@ button:active {
   border-bottom: 1px solid var(--color-primary);
 }
 
-.thread-block, .message-block {
+.thread-block,
+.message-block {
   display: grid;
   grid-template-columns: [col1] 1fr [col2] 2fr [col3] 1fr [colend];
   grid-template-rows: [row1] 1.5em [row2] 1fr [rowend];
@@ -130,14 +389,16 @@ button:active {
   padding: 5px;
 }
 
-.thread-sender {
+/*------------------------------------
+  Thread Elements
+------------------------------------*/
+.thread-sender,
+.thread-recipient {
   grid-row: 1 / 2;
   font-weight: 500;
 }
 
 .thread-recipient {
-  grid-row: 1 / 2;
-  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -162,7 +423,10 @@ button:active {
   text-overflow: ellipsis;
 }
 
-.message-header  {
+/*------------------------------------
+  Message View
+------------------------------------*/
+.message-header {
   background-color: var(--color-bg);
 }
 
@@ -187,7 +451,7 @@ button:active {
 .message-sender {
   grid-row: 1 / 2;
   grid-column: 1 / span 2;
-  font-size: .8em;
+  font-size: 0.8em;
 }
 
 .message-timestamp {
@@ -206,11 +470,14 @@ button:active {
   padding: 10px;
 }
 
+/*------------------------------------
+  Message Send Box
+------------------------------------*/
 #smsContent {
   display: inline-block;
   width: 100%;
   padding-right: 20px;
-  margin-bottom: 0px;
+  margin-bottom: 0;
   height: 50%;
 }
 

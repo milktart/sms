@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <style>
+      
+    </style>
+
+    <style>
+      :root {
+        --color-primary: #343434;
+        --color-contrast: #c0c0c0;
+        --color-light-grey: #e0e0e0;
+        --color-bg: #fffdfb; /* #f8f4ff; #FFFBF4; #FFFCF6 #FFFAF0 */
+        --color-text-main: #000000; /* #343434; */
+        --color-mint: #d7f5ef;
+        --color-accent: #2800ff;
+        --color-sub: #393734; /* #41403d; #666461; */
+        --color-light: #707070; /* #B1B1AF; */
+        --wrapper-height: 91vh;
+        --image-max-width: 300px;
+        --image-margin: 3rem;
+        --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+        /* Brown Blue Palette */
+        --color-light-blue: #bfc7d3;
+        --color-blue: #839bbf;
+        --color-dark-blue: #001865;
+        --color-light-brown: #ce8c52;
+        --color-dark-brown: #a34c17;
+        --color-peach: #ecccb2;
+        --color-white: #f3f2f0;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        font-family: var(--font-family);
+        font-size: 14px;
+        border: 0px solid black;
+      }
+
+      /* Layout */
+      .wrapper {
+        display: grid;
+        height: var(--wrapper-height);
+        z-index: 1;
+      }
+
+      .wrapper > * {
+        padding: 0px;
+        margin: 0px;
+      }
+      
+      @keyframes spin {
+        to {
+          transform: rotate(340deg);
+        }
+      }
+      
+      @keyframes spin2 {
+        from {
+          transform: scale(1.1);
+        }
+        
+        to {
+          transform: scale(2.1);
+        }
+      }
+      
+      .bg-layer {
+        display: block;
+        position: fixed;
+        height: 200%;
+        width: 200%;
+        text-overflow: hidden;
+        border: 0px solid blue;
+        z-index: -99;
+        left: -25%;
+        top: -50%; 
+        animation: spin2 20s linear infinite alternate;
+      }
+
+      svg {
+        transform-origin: center;
+        animation-direction: alternate;
+        border: 0px solid red;
+        display: block;
+        position: fixed;
+        animation: spin 20s linear infinite;
+      }
+
+      canvas {
+        height: 0%;
+        width: 0%;
+        -webkit-filter: blur(20px);
+        -moz-filter: blur(20px);
+        filter: blur(0px);
+      }
+
+      .overlay {
+        display: inline-block;
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        padding: 10px;
+      }
+    </style>
+
+    <div class="bg-layer">
+      <!-- viewbox="0 0 1000 1000"  -->
+      <svg width="2500" height="2500" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter
+            id="blur-filter"
+            width="800%"
+            height="800%"
+            x="-400%"
+            y="-400%"
+          >
+            <fegaussianblur stddeviation="80 80" in="SourceGraphic" />
+          </filter>
+        </defs>
+        <g
+          transform="scale(1.5)"
+          transform-origin="-200 00"
+          filter="url(#blur-filter)"
+        >
+          <circle fill="#bfc7d3" r="30" cx="710" cy="710" />
+          <circle fill="#839bbf" r="45" cx="300" cy="255" />
+          <circle fill="#001865" r="65" cx="175" cy="455" />
+          <circle fill="#ce8c52" r="50" cx="500" cy="315" />
+          <circle fill="#a34c17" r="55" cx="600" cy="615" />
+          <circle fill="#ecccb2" r="60" cx="775" cy="555" />
+          
+          <circle fill="#bfc7d3" r="55" cx="95" cy="150" />
+          <circle fill="#839bbf" r="60" cx="750" cy="355" />
+          <circle fill="#001865" r="85" cx="675" cy="155" />
+          <circle fill="#ce8c52" r="40" cx="250" cy="85" />
+          <circle fill="#a34c17" r="50" cx="150" cy="715" />
+          <circle fill="#ecccb2" r="65" cx="375" cy="755" />
+          
+          <circle fill="#bfc7d3" r="55" cx="370" cy="550" />
+          <circle fill="#839bbf" r="60" cx="355" cy="900" />
+          <circle fill="#001865" r="85" cx="255" cy="775" />
+          <circle fill="#ce8c52" r="40" cx="85" cy="250" />
+          <circle fill="#a34c17" r="50" cx="415" cy="150" />
+          <circle fill="#ecccb2" r="65" cx="625" cy="475" />
+        </g>
+      </svg>
+      </div>
+
+      <!--
+          <canvas id="myCanvas">
+        Sorry, your browser does not support canvas.
+      </canvas>
+    -->
+    
+
+    <span class="overlay">
+      <input
+        type="range"
+        min="-250"
+        max="250"
+        value="0"
+        class="slider"
+        id="xRange"
+      />
+      <span id="xRval"></span>
+      <br />
+      <input
+        type="range"
+        min="-250"
+        max="250"
+        value="0"
+        class="slider"
+        id="yRange"
+      />
+      <span id="yRval"></span>
+    </span>
+
+    <script>
+      var xRange = document.getElementById("xRange"),
+        yRange = document.getElementById("yRange"),
+        xRval = document.getElementById("xRval"),
+        yRval = document.getElementById("yRval");
+
+      function build(x, y) {
+        var x = x || 250,
+          y = y || 250;
+        const c = document.getElementById("myCanvas");
+        const ctx = c.getContext("2d");
+
+        // Create linear gradient
+        const grad = ctx.createLinearGradient(0, 0, x, y);
+        grad.addColorStop(0, "#ECCCB2");
+        grad.addColorStop(0.4, "#CE8C52");
+        grad.addColorStop(0.8, "#001865");
+        grad.addColorStop(1, "#839BBF");
+
+        // Fill rectangle with gradient
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 400, 2000);
+      }
+
+      build();
+
+      // Update the current slider value (each time you drag the slider handle)
+      xRange.oninput = function () {
+        xRval.innerHTML = xRange.value;
+        yRval.innerHTML = yRange.value;
+        yRange.value = 100 - xRange.value * Math.PI;
+        build(xRange.value, yRange.value);
+      };
+
+      yRange.oninput = function () {
+        xRval.innerHTML = xRange.value;
+        yRval.innerHTML = yRange.value;
+        xRange.value = 100 - yRange.value * Math.PI;
+        build(xRange.value, yRange.value);
+      };
+    </script>
+  </body>
+</html>

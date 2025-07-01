@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Animated Background</title>
+    <style>
+      /* Basic reset and setup */
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        overflow-x: hidden; /* Prevent accidental horizontal scroll */
+        font-family: sans-serif;
+        background-color: var(--color-white); /* Fallback background */
+      }
+      
+      :root {
+        /* Brown Blue Palette */
+        --color-light-blue: #bfc7d3;
+        --color-blue: #839bbf;
+        --color-dark-blue: #001865;
+        --color-light-brown: #ce8c52;
+        --color-dark-brown: #a34c17;
+        --color-peach: #ecccb2;
+        --color-white: #f3f2f0;
+      }
+
+      /* The fixed container for the animation */
+      .background-animation {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 150vw;
+        height: 150vh;
+        overflow: hidden;
+        transform: translate(-50%, -50%);
+        filter: blur(40px);
+        background-color: var(--color-white);
+        animation: subtleBackgroundAnimation 60s ease-in-out infinite alternate;
+      }
+
+      @keyframes subtleBackgroundAnimation {
+        0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) scale(1.5) rotate(340deg); }
+      }
+
+      .circle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0.6;
+        filter: blur(40px);
+      }
+
+      .circle1 {
+        width: 300px;
+        height: 300px;
+        background-color: var(--color-light-blue); 
+        top: 15%;
+        left: 20%;
+      }
+      
+      .circle2 {
+        width: 450px;
+        height: 450px;
+        background-color: var(--color-dark-blue); 
+        top: 30%;
+        left: 65%;
+      }
+      
+      .circle3 {
+        width: 200px;
+        height: 200px;
+        background-color: var(--color-peach); 
+        top: 60%;
+        left: 10%;
+      }
+
+      .circle4 {
+        width: 380px;
+        height: 380px;
+        background-color: var(--color-light-brown); 
+        top: 55%;
+        left: 80%;
+      }
+      
+      .circle5 {
+        width: 280px;
+        height: 280px;
+        background-color: var(--color-peach); 
+        top: 5%;
+        left: 50%;
+      }
+      
+      .circle6 {
+        width: 150px;
+        height: 150px;
+        background-color: var(--color-dark-brown);
+        top: 80%;
+        left: 30%;
+      }
+      
+      .circle7 {
+        width: 175px;
+        height: 175px;
+        background-color: var(--color-light-blue); 
+        top: 70%;
+        left: 60%;
+      }
+      
+      .circle8 {
+        width: 100px;
+        height: 100px;
+        background-color: var(--color-dark-blue); 
+        top: 10%;
+        left: 80%;
+      }
+      
+      .circle9 {
+        width: 200px;
+        height: 200px;
+        background-color: var(--color-blue); 
+        top: 55%;
+        left: 30%;
+      }
+      
+      .circle10 {
+        width: 50px;
+        height: 50px;
+        background-color: var(--color-light-brown); 
+        top: 50%;
+        left: 15%;
+      }
+      
+      .circle11 {
+        width: 200px;
+        height: 200px;
+        background-color: var(--color-dark-brown); 
+        top: 35%;
+        left: 45%;
+      }
+      
+      .circle12 {
+        width: 25px;
+        height: 25px;
+        background-color: var(--color-peach); 
+        top: 15%;
+        left: 15%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background-animation">
+      <div class="circle circle1"></div>
+      <div class="circle circle2"></div>
+      <div class="circle circle3"></div>
+      <div class="circle circle4"></div>
+      <div class="circle circle5"></div>
+      <div class="circle circle6"></div>
+      <div class="circle circle7"></div>
+      <div class="circle circle8"></div>
+      <div class="circle circle9"></div>
+      <div class="circle circle10"></div>
+      <div class="circle circle11"></div>
+      <div class="circle circle12"></div>
+    </div>
+  </body>
+</html>

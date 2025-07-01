@@ -2,15 +2,9 @@
 // run by the browser each time your view template is loaded
 
 const g = {
-  i: (x) => {
-    return document.getElementById(x);
-  },
-  q: (x) => {
-    return document.querySelector(x);
-  },
-  a: (x) => {
-    return document.querySelectorAll(x);
-  },
+  i: x => document.getElementById(x),
+  q: x => document.querySelector(x),
+  a: x => document.querySelectorAll(x)
 };
 
 const token = localStorage.getItem("token");
