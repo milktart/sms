@@ -1,0 +1,152 @@
+:root {
+  --color-bg: #FFFDFB; /*#FFFBF4; /* #FFFCF6 #FFFAF0 */
+  --color-text-main: #000000;
+  --color-mint: #D7F5EF;
+  --color-accent: #2800FF;
+  --color-sub: #393734; /* #41403d; #666461; */
+  --color-light: #707070; /* #B1B1AF; */
+  --wrapper-height: 87vh;
+  --image-max-width: 300px;
+  --image-margin: 3rem;
+  --font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  background-color: var(--color-bg);
+  font-family: var(--font-family);
+  font-size: 14px;
+  border: 0px solid black;
+}
+
+/* Grid Area Assignments */
+.main-head   { grid-area: header; }
+.content     { grid-area: content; }
+.main-nav    { grid-area: nav; }
+.main-footer { grid-area: footer; }
+
+/* Utilities */
+.ta-r { text-align: right; }
+.i { font-style: italic; }
+.w { /* letter-spacing: 0.02em; */ }
+
+.fw-1 { font-weight: 100; }
+.fw-2 { font-weight: 200; }
+.fw-3 { font-weight: 300; }
+.fw-4 { font-weight: 400; }
+.fw-5 { font-weight: 500; }
+.fw-6 { font-weight: 600; }
+.fw-7 { font-weight: 700; }
+.fw-8 { font-weight: 800; }
+.fw-9 { font-weight: 900; }
+
+/* Navigation */
+nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0; 
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: var(--color-text-main);
+  font-size: 1.1em;
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
+}
+
+/* Layout */
+.wrapper {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-areas:
+    "header header header header"
+    "content content content content"
+    "content content content content"
+    "footer footer footer footer";
+}
+
+.wrapper > * {
+  padding: 10px;
+}
+
+/* Header */
+header {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 3fr 1fr;
+  color: var(--color-sub);
+  letter-spacing: 0.035em;
+}
+
+header span {
+  font-size: 3em;
+}
+
+/* Header */
+.beta {
+  display: grid;
+  gap: 10px;
+  color: var(--color-sub);
+  letter-spacing: -.1em;
+}
+
+.beta span {
+  font-size: 4em;
+  font-family: "Inter", "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif !important;
+  font-style: italic;
+}
+
+/* Content Articles */
+article {
+  display: grid;
+  padding: 10px 0;
+  grid-template-columns: 1fr;
+}
+
+.content article {
+  gap: 10px 30px;
+  border-bottom: 1px solid #000000;
+}
+
+/* Subheader */
+.subheader {
+  display: block;
+  font-weight: 600;
+}
+
+footer {
+  color: var(--color-light);
+  padding: 0px;
+  margin: 0px;
+}
+
+footer article {
+  gap: 0px 30px !important;
+}
+
+/* Wide Screen */
+@media (min-width: 700px) {
+  * {
+    border: 0px solid black;
+  }
+  article.c-1 { grid-template-columns: 1fr; }
+  article.c-2 { grid-template-columns: repeat(2, 1fr); }
+  article.c-3 { grid-template-columns: repeat(3, 1fr); }
+  article.c-4 { grid-template-columns: repeat(4, 1fr); }
+
+  nav ul {
+    display: flex;
+  }
+  
+  li:not(:last-child)::after {
+    content: ", ";
+  }
+  
+  li { margin: 0 2px; }
+  
+}
