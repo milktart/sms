@@ -1,8 +1,17 @@
 services:
-  ipsum:
-    build: .
+  sms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
     ports:
-      - "5211:8080"
+      - "5220:8080"
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - node_modules:/usr/src/app/node_modules
+      - .data:/usr/src/app/.data
+
+volumes:
+  .data:
+  node_modules:
+

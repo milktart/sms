@@ -1,101 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <title>Lorem Ipsum</title>
-    <link rel="stylesheet" href="/style.css" />
+    <title>Dashboard</title>
+    <%- include("partials/head") %>
   </head>
-
   <body>
-    <div class="wrapper">
-      <header class="main-head">
-        <span class="fw-5">LOREM IPSUM</span>
-        <span class="">
-          <nav class="main-nav">
-            <ul>
-              <li><a href="">Work</a></li>
-              <li><a href="">Contact</a></li>
-              <li><a href="">Instagram</a></li>
-            </ul>
-          </nav>
-        </span>
-      </header>
+    <div class="background-animation">
+      <div class="circle circle1"></div>
+      <div class="circle circle2"></div>
+      <div class="circle circle3"></div>
+      <div class="circle circle4"></div>
+      <div class="circle circle5"></div>
+      <div class="circle circle6"></div>
+      <div class="circle circle7"></div>
+      <div class="circle circle8"></div>
+      <div class="circle circle9"></div>
+      <div class="circle circle10"></div>
+      <div class="circle circle11"></div>
+      <div class="circle circle12"></div>
+    </div>
+    <input type="hidden" value="<%= threadId %>" id="threadId" />
+    
+    <div class="wrapper" id="wrapper">
+      <%- include("partials/header") %>
+      <div class="content">
       
-      <section class="content">
-        <article class="c-1">
-          <h1>Main article area</h1>
-          <p>
-            In this layout, we display the areas in source order for any screen
-            less that 500 pixels wide. We go to a two column layout, and then to a
-            three column layout by redefining the grid, and the placement of items
-            on the grid.
-          </p>
-        </article>
+        <section id="threads-wrapper" class="core-container">
+          <section id="thread-container"></section>
+        </section>
+
+        <section id="messages-wrapper" class="core-container">
+          <section id="message-container"></section>
+        </section>
+      </div>
+
+      <%- include("partials/nav") %>
         
-        <article class="c-2">
-          <h1>Main article area</h1>
-          <p>
-            In this layout, we display the areas in source order for any screen
-            less that 500 pixels wide. We go to a two column layout, and then to a
-            three column layout by redefining the grid, and the placement of items
-            on the grid.
-          </p>
-        </article>
-        
-        <article class="c-3 w">
-          <h1>Main article area</h1>
-          <p>
-            In this layout, we display the areas in source order for any screen
-            less that 500 pixels wide. We go to a two column layout, and then to a
-            three column layout by redefining the grid, and the placement of items
-            on the grid.
-          </p>
-          <p>
-            In this layout, we display the areas in source order for any screen
-            less that 500 pixels wide. We go to a two column layout, and then to a
-            three column layout by redefining the grid, and the placement of items
-            on the grid.
-          </p>
-        </article>
-        
-        <article class="c-4">
-          <h1>Main article area</h1>
-          <p>
-            In this layout, we display the areas in source order for any screen
-            less that 500 pixels wide. We go to a two column layout, and then to a
-            three column layout by redefining the grid, and the placement of items
-            on the grid.
-          </p>
-          <p>
-            <span class="subheader">Sub-header</span>
-            In this layout, we display the areas in source order for any screen
-            less that 500 pixels wide. We go to a two column layout, and then to a
-            three column layout by redefining the grid, and the placement of items
-            on the grid.
-          </p>
-          <p>
-            In this layout, we display the areas in source order for any screen
-            less that 500 pixels wide. We go to a two column layout, and then to a
-            three column layout by redefining the grid, and the placement of items
-            on the grid.
-          </p>
-        </article>
-      </section>
-      
-      <footer class="main-footer">
-        <article class="c-2 w">
-          <p>&copy;MMXXV</p>
-          <p class="">
-            Lorem ipsum dolor sit amet
-          </p>
-        </article>
-      </footer>
     </div>
 
+    <script>
+      // Redirect to dashboard if token already exists
+      $(function () {
+        if (!localStorage.token) {
+          window.location.replace("/");
+        }
+      });
+      
+      let numbers = getNumbers();
+      $(function () {
+        if (g.i("threadId").value && g.i("threadId").value != "NULL") {
+          getMessages(g.i("threadId").value);
+        }
+      });
+      
+    </script>
+      
+      <!--<input id="phone" type="tel" />
+        <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/intlTelInput.min.js"></script>
+<script>
+  const input = document.querySelector("input[type=tel]");
+  window.intlTelInput(input, {
+    initialCountry: "us",
+  separateDialCode: true,
+    utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/utils.js",
+  });
+</script>-->
   </body>
-
 </html>
